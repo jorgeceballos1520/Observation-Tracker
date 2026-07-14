@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>IDEA Spears Observation Tracker 2.0</title>
+<style>
+:root{
+  --navy:#17283c;--navy2:#233d59;--blue:#1677b8;--paper:#f6f4ee;--card:#fff;
+  --line:#dedbd1;--muted:#697586;--gold:#c9972d;--goldbg:#fbf0d8;
+  --red:#b94831;--redbg:#f9e4dd;--green:#39734b;--greenbg:#e3f0e6;
+  --purple:#654ea3;--purplebg:#eee9fb;--shadow:0 8px 24px rgba(28,44,61,.08);
+}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--paper);color:var(--navy)}
+button,input,select,textarea{font:inherit} button{cursor:pointer}
+#app{display:flex;min-height:100vh}
+aside{width:275px;background:var(--navy);color:#fff;padding:22px 16px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{padding:0 8px 18px}.brand h1{font-size:19px;margin:0}.brand p{margin:5px 0 0;color:#aeb9c6;font-size:12px}
+nav button,.teacher-link{width:100%;border:0;background:transparent;color:#dbe2e9;text-align:left;padding:9px 10px;border-radius:9px;margin:2px 0}
+nav button:hover,.teacher-link:hover{background:rgba(255,255,255,.08)}nav button.active,.teacher-link.active{background:rgba(255,255,255,.16);color:#fff;font-weight:700}
+.side-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8594a4;margin:18px 9px 7px}
+.teacher-link{display:flex;gap:8px;align-items:center;font-size:13px}.dot{width:8px;height:8px;border-radius:50%;background:#758398}.teacher-name{flex:1}.count{font-size:10px;background:var(--red);padding:2px 6px;border-radius:12px}
+aside .bottom{margin-top:auto;display:grid;gap:7px}.side-btn{border:1px solid #3e5267;background:transparent;color:#cbd5df;padding:8px;border-radius:8px}
+main{flex:1;padding:30px 38px;max-width:1240px}
+h2,h3{margin-top:0}.serif{font-family:Georgia,serif}
+.page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:22px}.page-head h2{margin:0 0 4px;font-size:25px}.sub{color:var(--muted);font-size:13px}
+.btn{border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 14px;border-radius:9px}.btn:hover{border-color:#99a4b0}.btn-primary{background:var(--navy);border-color:var(--navy);color:#fff}.btn-danger{color:var(--red)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px;margin-bottom:18px}.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px;box-shadow:var(--shadow)}.stat b{font-size:24px;display:block}.stat span{font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:var(--shadow)}.teacher-card{cursor:pointer}.teacher-card:hover{border-color:#9da9b4}.teacher-card h3{font-size:16px;margin-bottom:2px}.subject{font-size:12px;color:var(--muted);margin-bottom:12px}.row{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);margin-top:8px}
+.badge{display:inline-block;border-radius:20px;padding:4px 8px;font-size:11px;font-weight:700}.open{background:var(--redbg);color:var(--red)}.progress{background:var(--goldbg);color:#86610e}.mastered{background:var(--greenbg);color:var(--green)}.sustaining{background:var(--purplebg);color:var(--purple)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}.panel h3{font-size:16px;margin-bottom:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.obs{border-left:5px solid var(--blue)}.obs-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.obs-title{font-weight:700}.meta{font-size:12px;color:var(--muted);margin-top:3px}.chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.chip{font-size:11px;border:1px solid var(--line);background:#faf9f5;padding:4px 7px;border-radius:7px}.evidence{background:#f4f7fa;border:1px solid #d9e1e8;padding:10px;border-radius:8px;font-size:13px;white-space:pre-wrap}.gg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.glow,.grow{padding:10px;border-radius:8px;font-size:13px}.glow{background:var(--goldbg)}.grow{background:var(--redbg)}.label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px}
+.action{margin-top:10px;background:#f8f7f2;padding:10px;border-radius:8px;display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:13px}
+.small{font-size:12px}.muted{color:var(--muted)}.empty{text-align:center;padding:35px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px;border-bottom:1px solid var(--line);text-align:left}th{font-size:11px;text-transform:uppercase;color:var(--muted)}
+.overlay{position:fixed;inset:0;background:rgba(13,25,39,.52);display:flex;align-items:flex-start;justify-content:center;padding:25px;overflow:auto;z-index:20}.modal{width:760px;max-width:100%;background:#fff;border-radius:15px;padding:25px;box-shadow:0 25px 70px rgba(0,0,0,.25)}.modal h3{font-size:20px}
+.field{margin-bottom:13px}.field label{display:block;font-size:12px;font-weight:700;color:#566373;margin-bottom:5px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);padding:9px 10px;border-radius:8px;background:#fff;color:var(--navy)}.field textarea{min-height:70px;resize:vertical}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.hint{font-size:11px;color:var(--muted);margin-top:4px}
+.rating-row{display:flex;gap:6px;flex-wrap:wrap}.rating-btn{border:1px solid var(--line);background:#fff;padding:7px 10px;border-radius:8px;font-size:12px}.rating-btn.selected{background:var(--navy);color:#fff;border-color:var(--navy)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.search{min-width:240px;border:1px solid var(--line);padding:8px 10px;border-radius:8px}
+.alert{padding:11px 13px;border-radius:9px;background:var(--redbg);color:#78311f;font-size:13px;margin-bottom:14px}
+@media(max-width:850px){#app{display:block}aside{width:auto;height:auto;position:static}main{padding:20px}.stats,.two,.three,.gg{grid-template-columns:1fr}.page-head{display:block}.page-head .btn{margin-top:12px}}
+</style>
+</head>
+<body>
+<div id="app">
+<aside>
+  <div class="brand"><h1 class="serif">Observation Tracker 2.0</h1><p>IDEA Spears · API Coaching System</p></div>
+  <nav>
+    <button data-view="dashboard" class="active">Dashboard</button>
+    <button data-view="analytics">Analytics</button>
+    <button data-view="actions">Action Steps</button>
+  </nav>
+  <div class="side-label">Teacher Caseload</div>
+  <div id="teacherNav"></div>
+  <div class="bottom">
+    <button class="side-btn" id="importBtn">Import Backup</button>
+    <button class="side-btn" id="backupBtn">Export Backup</button>
+    <button class="side-btn" id="csvBtn">Export CSV</button>
+    <input id="importFile" type="file" accept=".json" hidden>
+  </div>
+</aside>
+<main id="main"></main>
+</div>
+<script>
+const TEACHERS=[
+{id:"t1",name:"L. Williams",subject:"Intervention"},
+{id:"t2",name:"T. Chow",subject:"6th Math"},
+{id:"t3",name:"A. Emenonyu",subject:"7th Math"},
+{id:"t4",name:"R. Raybon",subject:"8th Math"},
+{id:"t5",name:"G. Naves",subject:"Geometry"},
+{id:"t6",name:"L. Conkleton",subject:"Alg 1 - Pre Cal"},
+{id:"t7",name:"Vacancy",subject:"Pre-Cal",vacancy:true},
+{id:"t8",name:"Vacancy",subject:"AP Statistics",vacancy:true},
+{id:"t9",name:"Vacancy",subject:"AP Physics",vacancy:true},
+{id:"t10",name:"L. Mosqueda",subject:"AP Spanish"},
+{id:"t11",name:"R. Quiroz",subject:"PE"},
+{id:"t12",name:"K. Waddell",subject:"PE"},
+{id:"t13",name:"K. Abdullah",subject:"Spanish"}
+];
+
+const GET={
+"1. Content":{
+essential:"Are students engaged in content aligned to the appropriate standards for their subject and grade?",
+strands:["I. Unit Scope","II. Grade-Level Mastery","III. Unit Sequence","IV. Lesson-Level Mastery","V. Lesson Sequence","VI. Lesson Purpose","VII. Academic Content"]
+},
+"2. Culture":{
+essential:"Are students joyfully engaged in a positive learning environment?",
+strands:["I. Classroom Routines & Procedures","II. Behavioral Expectations","III. Maximize Learning Time","IV. Culture of Joy","V. Response to Behavior","VI. Sense of Belonging","VII. Physical Environment"]
+},
+"3. Ownership":{
+essential:"Are students doing the thinking?",
+strands:["I. Think Ratio","II. Students Complete Work","III. Students Provide Evidence","IV. Students Respond to Peers"]
+},
+"4. Using Data":{
+essential:"Are students demonstrating that they are learning?",
+strands:["I. Students Receive Feedback","II. Data-Based Adjustments","III. Impact of Adjustments","IV. Student Tracking"]
+},
+"5. Beyond the Lesson":{
+essential:"Do your overall actions support student learning?",
+strands:["I. Family Communication & Partnership","II. Professional Responsibilities","III. Collaboration & Contribution","IV. Student Advocacy & Support"]
+}
+};
+
+const GBF={
+"Phase 1 · Pre-Teaching":{
+"Management · Develop Essential Routines & Procedures":[
+"Plan & Practice Critical Routines & Procedures Moment-by-Moment","Plan & Practice the Roll-Out","Square Up, Stand Still","Formal Register"],
+"Rigor · Write and Internalize Lesson Plans":[
+"Write Precise Learning Objectives","Script a Basic I Do","Design Exit Ticket Aligned to Objective","Internalize Key Parts of the Lesson","Build Time Stamps into Lesson"]
+},
+"Phase 2 · Days 1–30":{
+"Management · Roll Out & Monitor Routines":[
+"Economy of Language","Revise Routines","Do It Again","Cut It Short","Scan Hot Spots","Be Seen Looking","Circulate with Purpose","Move Away from Student Who Is Speaking","Planned Whole-Class Reset","In-the-Moment Reset"],
+"Rigor · Independent Practice":[
+"Write the Exemplar","Independent Practice Routines","Write First, Talk Second","Daily Do Now","Daily Exit Ticket","Monitoring Pathway","Monitor Quality of Student Work","Pen in Hand"]
+},
+"Phase 3 · Days 31–60":{
+"Management · Engage Every Student":[
+"Build Momentum","Pacing","Countdown to Work the Clock","Call and Response","Call on All Students","Cold Call","Turn & Talk","Narrate the Positive","Individual Student Corrections"],
+"Rigor · Respond to Student Learning Needs":[
+"Habits of Evidence","Check for Whole-Group Understanding","Target the Error","Re-teaching 101: Model","Model the Thinking"]
+},
+"Phase 4 · Days 61–90":{
+"Management · Set Routines for Discourse":[
+"Explicit Instructions for Group Work","Monitor Group Progress","Verbally Enforce Individual & Group Accountability"],
+"Rigor · Lead Student Discourse 101":[
+"Re-teaching 201: Guided Discourse","Show-Call","Stamp the Understanding","Give Them At-Bats","Universal Prompts","Wait Time","Pre-Call","Roll Back the Answer","Close the Loop","Habits of Discussion"]
+},
+"Stretch It · Next Steps":{
+"Rigor · Lead Student Discourse 201":[
+"Strategic Prompts","Data-Driven Call Sequence","Students Prompting Students","Go Conceptual","Upgrade Vocabulary","Stretch It"]
+}
+};
+
+const TYPES=["Lesson Internalization Feedback","Classroom Observation","Coaching Conversation","Coach to Mastery Follow-Up","LP Feedback","Informal Walkthrough","Formal Walkthrough"];
+const RATINGS=["Pre-Novice","Novice","Proficient","Advanced","Exceptional","Not Rated"];
+const STATUS=["Introduced","Practicing","Mastered","Sustaining"];
+const KEY="idea_spears_tracker_2";
+let state=JSON.parse(localStorage.getItem(KEY)||'{"observations":[]}');
+let view={screen:"dashboard",teacherId:null};
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function uid(){return crypto.randomUUID?crypto.randomUUID():"id"+Date.now()+Math.random().toString(36).slice(2)}
+function fmt(d){if(!d)return"";return new Date(d+"T00:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}
+function obsFor(id){return state.observations.filter(o=>o.teacherId===id).sort((a,b)=>b.date.localeCompare(a.date))}
+function activeFor(id){return obsFor(id).filter(o=>!["Mastered","Sustaining"].includes(o.status))}
+function overdue(){const today=new Date().toISOString().slice(0,10);return state.observations.filter(o=>o.followUp&&o.followUp<today&&!["Mastered","Sustaining"].includes(o.status))}
+function escapeHtml(s=""){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function renderNav(){
+ const wrap=document.getElementById("teacherNav");
+ wrap.innerHTML=TEACHERS.map(t=>`<button class="teacher-link ${view.teacherId===t.id?"active":""}" data-id="${t.id}">
+ <span class="dot"></span><span class="teacher-name">${t.name} · ${t.subject}</span>${activeFor(t.id).length?`<span class="count">${activeFor(t.id).length}</span>`:""}</button>`).join("");
+ wrap.querySelectorAll("button").forEach(b=>b.onclick=()=>{view={screen:"teacher",teacherId:b.dataset.id};render()});
+ document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===view.screen));
+}
+function render(){
+ renderNav();
+ const m=document.getElementById("main");
+ if(view.screen==="dashboard")m.innerHTML=dashboard();
+ if(view.screen==="teacher")m.innerHTML=teacherPage(view.teacherId);
+ if(view.screen==="analytics")m.innerHTML=analytics();
+ if(view.screen==="actions")m.innerHTML=actionsPage();
+ bind();
+}
+function dashboard(){
+ const obs=state.observations, od=overdue(), thisMonth=new Date().toISOString().slice(0,7);
+ return `<div class="page-head"><div><h2 class="serif">Instructional Coaching Dashboard</h2><div class="sub">Track evidence, GET ratings, GBF action steps, and coaching cycles.</div></div><button class="btn btn-primary" id="newObs">+ New Observation</button></div>
+ ${od.length?`<div class="alert"><b>${od.length} follow-up${od.length===1?" is":"s are"} overdue.</b> Review the Action Steps page.</div>`:""}
+ <div class="stats">
+ <div class="stat"><b>${obs.length}</b><span>Total records</span></div>
+ <div class="stat"><b>${obs.filter(o=>o.date.startsWith(thisMonth)).length}</b><span>This month</span></div>
+ <div class="stat"><b>${obs.filter(o=>!["Mastered","Sustaining"].includes(o.status)).length}</b><span>Open action steps</span></div>
+ <div class="stat"><b>${od.length}</b><span>Overdue follow-ups</span></div></div>
+ <div class="grid">${TEACHERS.map(t=>{const os=obsFor(t.id),last=os[0],active=activeFor(t.id);return `<div class="card teacher-card ${t.vacancy?"muted":""}" data-id="${t.id}">
+ <h3>${t.name}</h3><div class="subject">${t.subject}</div>
+ ${t.vacancy?`<div class="muted small">Position not yet filled</div>`:`<div class="row"><span>${os.length} records</span><span>${last?fmt(last.date):"No visits yet"}</span></div>
+ <div class="row"><span>${active.length?`<b style="color:var(--red)">${active.length} active step${active.length===1?"":"s"}</b>`:"No active steps"}</span><span>${last?last.getGuidepost||"":""}</span></div>`}</div>`}).join("")}</div>`;
+}
+function teacherPage(id){
+ const t=TEACHERS.find(x=>x.id===id),os=obsFor(id),current=activeFor(id)[0];
+ return `<div class="page-head"><div><button class="btn" id="back">← Dashboard</button><h2 class="serif" style="margin-top:14px">${t.name}</h2><div class="sub">${t.subject}</div></div>${!t.vacancy?`<button class="btn btn-primary" id="newObs">+ New Observation</button>`:""}</div>
+ ${current?`<div class="panel"><h3>Current Coaching Focus</h3><div class="two"><div><span class="label">GET Focus</span>${escapeHtml(current.getGuidepost)} · ${escapeHtml(current.getStrand)}</div><div><span class="label">GBF Action Step</span>${escapeHtml(current.gbfAction)}</div></div><div class="action"><div><b>${escapeHtml(current.actionStep)}</b><div class="small muted">Follow-up: ${current.followUp?fmt(current.followUp):"Not scheduled"}</div></div><span class="badge ${current.status.toLowerCase()}">${current.status}</span></div></div>`:""}
+ <div class="panel"><h3>Observation & Coaching History</h3>${os.length?os.map(obsCard).join(""):`<div class="empty">No coaching records yet.</div>`}</div>`;
+}
+function obsCard(o){
+ return `<div class="panel obs"><div class="obs-head"><div><div class="obs-title">${fmt(o.date)} · ${escapeHtml(o.type)}</div><div class="meta">${escapeHtml(o.coachingStage)} · ${escapeHtml(o.getGuidepost)} · ${escapeHtml(o.getStrand)}</div></div><button class="btn btn-danger delete" data-id="${o.id}">Delete</button></div>
+ <div class="chips"><span class="chip">GET: ${escapeHtml(o.rating)}</span><span class="chip">${escapeHtml(o.gbfPhase)}</span><span class="chip">${escapeHtml(o.gbfTrajectory)}</span><span class="chip">GBF: ${escapeHtml(o.gbfAction)}</span></div>
+ <span class="label">Low-Inference Evidence</span><div class="evidence">${escapeHtml(o.evidence||"—")}</div>
+ <div class="gg"><div class="glow"><span class="label">Glow</span>${escapeHtml(o.glow||"—")}</div><div class="grow"><span class="label">Grow</span>${escapeHtml(o.grow||"—")}</div></div>
+ <div class="action"><div><b>Action step:</b> ${escapeHtml(o.actionStep||"—")}<div class="small muted">Look-for: ${escapeHtml(o.lookFor||"—")} · Follow-up: ${o.followUp?fmt(o.followUp):"Not scheduled"}</div></div>
+ <select class="statusSelect" data-id="${o.id}">${STATUS.map(s=>`<option ${s===o.status?"selected":""}>${s}</option>`).join("")}</select></div></div>`;
+}
+function actionsPage(){
+ let rows=state.observations.filter(o=>o.actionStep).sort((a,b)=>(a.followUp||"9999").localeCompare(b.followUp||"9999"));
+ return `<div class="page-head"><div><h2 class="serif">Action Step Tracker</h2><div class="sub">Open coaching commitments and mastery progress.</div></div><button class="btn btn-primary" id="newObs">+ New Observation</button></div>
+ <div class="panel"><table><thead><tr><th>Teacher</th><th>GET / GBF</th><th>Action Step</th><th>Follow-up</th><th>Status</th></tr></thead><tbody>${rows.map(o=>{const t=TEACHERS.find(x=>x.id===o.teacherId);return `<tr><td>${t.name}<div class="small muted">${t.subject}</div></td><td>${escapeHtml(o.getStrand)}<div class="small muted">${escapeHtml(o.gbfAction)}</div></td><td>${escapeHtml(o.actionStep)}</td><td>${o.followUp?fmt(o.followUp):"—"}</td><td><select class="statusSelect" data-id="${o.id}">${STATUS.map(s=>`<option ${s===o.status?"selected":""}>${s}</option>`).join("")}</select></td></tr>`}).join("")}</tbody></table></div>`;
+}
+function analytics(){
+ const os=state.observations;
+ const tally=(key)=>{const m={};os.forEach(o=>{const v=o[key]||"Not selected";m[v]=(m[v]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])};
+ const barTable=(title,key)=>`<div class="panel"><h3>${title}</h3><table>${tally(key).map(([n,c])=>`<tr><td>${escapeHtml(n)}</td><td style="width:55px"><b>${c}</b></td></tr>`).join("")||`<tr><td class="muted">No data yet</td></tr>`}</table></div>`;
+ return `<div class="page-head"><div><h2 class="serif">Coaching Analytics</h2><div class="sub">Patterns across your teacher caseload.</div></div><button class="btn btn-primary" id="newObs">+ New Observation</button></div>
+ <div class="two">${barTable("Most Frequent GET Strands","getStrand")}${barTable("Most Frequent GBF Action Steps","gbfAction")}</div>
+ <div class="two">${barTable("Ratings Distribution","rating")}${barTable("Action Step Status","status")}</div>`;
+}
+function bind(){
+ document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{view={screen:b.dataset.view,teacherId:null};render()});
+ document.querySelectorAll(".teacher-card").forEach(c=>c.onclick=()=>{view={screen:"teacher",teacherId:c.dataset.id};render()});
+ const n=document.getElementById("newObs");if(n)n.onclick=()=>openModal(view.teacherId);
+ const b=document.getElementById("back");if(b)b.onclick=()=>{view={screen:"dashboard",teacherId:null};render()};
+ document.querySelectorAll(".delete").forEach(x=>x.onclick=()=>{if(confirm("Delete this record?")){state.observations=state.observations.filter(o=>o.id!==x.dataset.id);save();render()}});
+ document.querySelectorAll(".statusSelect").forEach(s=>s.onchange=()=>{const o=state.observations.find(x=>x.id===s.dataset.id);o.status=s.value;save();render()});
+}
+function options(arr,selected=""){return arr.map(x=>`<option ${x===selected?"selected":""}>${x}</option>`).join("")}
+function openModal(teacherId){
+ let getGuide=Object.keys(GET)[0],gbfPhase=Object.keys(GBF)[0],rating="Not Rated";
+ const overlay=document.createElement("div");overlay.className="overlay";
+ overlay.innerHTML=`<div class="modal"><h3 class="serif">New Observation / Coaching Record</h3>
+ <div class="two"><div class="field"><label>Teacher</label><select id="fTeacher">${TEACHERS.filter(t=>!t.vacancy).map(t=>`<option value="${t.id}" ${t.id===teacherId?"selected":""}>${t.name} · ${t.subject}</option>`).join("")}</select></div><div class="field"><label>Date</label><input id="fDate" type="date" value="${new Date().toISOString().slice(0,10)}"></div></div>
+ <div class="two"><div class="field"><label>Record Type</label><select id="fType">${options(TYPES)}</select></div><div class="field"><label>Coaching Cycle Stage</label><select id="fStage">${options(["1. Lesson Internalization Feedback","2. Classroom Observation","3. Coaching Conversation","4. Coach to Mastery in the Classroom"])}</select></div></div>
+ <div class="field"><label>GET Guidepost</label><select id="fGuide">${options(Object.keys(GET))}</select><div id="essential" class="hint"></div></div>
+ <div class="two"><div class="field"><label>GET Strand</label><select id="fStrand"></select></div><div class="field"><label>GET Rating</label><select id="fRating">${options(RATINGS)}</select></div></div>
+ <div class="field"><label>Low-Inference Evidence</label><textarea id="fEvidence" placeholder="Example: 18 of 24 students wrote a response before discussion; 5 students were called on; 3 CFUs were observed in 22 minutes."></textarea><div class="hint">Record observable facts, counts, quotations, percentages, and student work evidence—not conclusions.</div></div>
+ <div class="two"><div class="field"><label>GBF Phase</label><select id="fPhase">${options(Object.keys(GBF))}</select></div><div class="field"><label>GBF Trajectory / Category</label><select id="fTrajectory"></select></div></div>
+ <div class="field"><label>GBF Action Step / Skill</label><select id="fGBF"></select></div>
+ <div class="two"><div class="field"><label>Glow</label><textarea id="fGlow"></textarea></div><div class="field"><label>Grow</label><textarea id="fGrow"></textarea></div></div>
+ <div class="field"><label>Specific Action Step</label><textarea id="fAction" placeholder="What will the teacher do, when, and how?"></textarea></div>
+ <div class="two"><div class="field"><label>Look-For at Next Visit</label><textarea id="fLook"></textarea></div><div><div class="field"><label>Follow-Up Date</label><input id="fFollow" type="date"></div><div class="field"><label>Progress Status</label><select id="fStatus">${options(STATUS)}</select></div></div></div>
+ <div class="modal-actions"><button class="btn" id="cancel">Cancel</button><button class="btn btn-primary" id="saveObs">Save Record</button></div></div>`;
+ document.body.appendChild(overlay);
+ const refreshGet=()=>{getGuide=document.getElementById("fGuide").value;document.getElementById("fStrand").innerHTML=options(GET[getGuide].strands);document.getElementById("essential").textContent=GET[getGuide].essential};
+ const refreshPhase=()=>{gbfPhase=document.getElementById("fPhase").value;const trs=Object.keys(GBF[gbfPhase]);document.getElementById("fTrajectory").innerHTML=options(trs);refreshAction()};
+ const refreshAction=()=>{const tr=document.getElementById("fTrajectory").value;document.getElementById("fGBF").innerHTML=options(GBF[gbfPhase][tr]||[])};
+ refreshGet();refreshPhase();
+ document.getElementById("fGuide").onchange=refreshGet;document.getElementById("fPhase").onchange=refreshPhase;document.getElementById("fTrajectory").onchange=refreshAction;
+ document.getElementById("cancel").onclick=()=>overlay.remove();overlay.onclick=e=>{if(e.target===overlay)overlay.remove()};
+ document.getElementById("saveObs").onclick=()=>{
+  const val=id=>document.getElementById(id).value;
+  state.observations.push({id:uid(),teacherId:val("fTeacher"),date:val("fDate"),type:val("fType"),coachingStage:val("fStage"),getGuidepost:val("fGuide"),getStrand:val("fStrand"),rating:val("fRating"),evidence:val("fEvidence").trim(),gbfPhase:val("fPhase"),gbfTrajectory:val("fTrajectory"),gbfAction:val("fGBF"),glow:val("fGlow").trim(),grow:val("fGrow").trim(),actionStep:val("fAction").trim(),lookFor:val("fLook").trim(),followUp:val("fFollow"),status:val("fStatus")});
+  save();view={screen:"teacher",teacherId:val("fTeacher")};overlay.remove();render();
+ };
+}
+function download(name,text,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();URL.revokeObjectURL(a.href)}
+document.getElementById("backupBtn").onclick=()=>download("idea-spears-observation-tracker-backup.json",JSON.stringify(state,null,2),"application/json");
+document.getElementById("csvBtn").onclick=()=>{
+ const headers=["Date","Teacher","Subject","Type","Coaching Stage","GET Guidepost","GET Strand","Rating","Low-Inference Evidence","GBF Phase","GBF Trajectory","GBF Action","Glow","Grow","Action Step","Look-For","Follow-Up","Status"];
+ const rows=state.observations.map(o=>{const t=TEACHERS.find(x=>x.id===o.teacherId)||{};return [o.date,t.name,t.subject,o.type,o.coachingStage,o.getGuidepost,o.getStrand,o.rating,o.evidence,o.gbfPhase,o.gbfTrajectory,o.gbfAction,o.glow,o.grow,o.actionStep,o.lookFor,o.followUp,o.status]});
+ const csv=[headers,...rows].map(r=>r.map(v=>`"${String(v||"").replace(/"/g,'""')}"`).join(",")).join("\n");download("idea-spears-observation-tracker.csv",csv,"text/csv");
+};
+document.getElementById("importBtn").onclick=()=>document.getElementById("importFile").click();
+document.getElementById("importFile").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!Array.isArray(x.observations))throw Error();state=x;save();render();alert("Backup imported.")}catch{alert("That file is not a valid tracker backup.")}};r.readAsText(f)};
+render();
+</script>
+</body>
+</html>
