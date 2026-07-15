@@ -53,7 +53,7 @@ textarea{min-height:92px;resize:vertical}
 <div class="app">
 <div class="topbar">
   <div class="brand">Instructional Leadership Platform</div>
-  <div class="version">Teacher Portal v3.0</div>
+  <div class="version">Teacher Portal v3.1</div>
 </div>
 
 <section class="hero">
@@ -131,10 +131,9 @@ textarea{min-height:92px;resize:vertical}
 </section>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
 const firebaseConfig={
   apiKey:"AIzaSyA7nr506RwbSNZKFGPRKjb_qc_OFpgAhUM",
   authDomain:"idea-spears.firebaseapp.com",
@@ -162,11 +161,23 @@ const TEACHER_ID_BY_LEGACY_KEY=Object.fromEntries(
   Object.entries(TEACHERS_BY_ID).map(([id,profile])=>[profile.legacyKey,id])
 );
 
-const app=initializeApp(firebaseConfig);
-const db=getFirestore(app);
+if(!firebase.apps.length){
+  firebase.initializeApp(firebaseConfig);
+}
+const db=firebase.firestore();
+
+function collection(database,name){
+  return database.collection(name);
+}
+function addDoc(collectionReference,data){
+  return collectionReference.add(data);
+}
+function serverTimestamp(){
+  return firebase.firestore.FieldValue.serverTimestamp();
+}
 const params=new URLSearchParams(location.search);
-const requestedTeacherId=(params.get("id")||"").toUpperCase();
-const legacyTeacherKey=(params.get("teacher")||"").toLowerCase();
+const requestedTeacherId=(params.get("id")||"").trim().toUpperCase();
+const legacyTeacherKey=(params.get("teacher")||"").trim().toLowerCase();
 const teacherId=requestedTeacherId||TEACHER_ID_BY_LEGACY_KEY[legacyTeacherKey]||"";
 const profile=TEACHERS_BY_ID[teacherId]||null;
 const teacherKey=profile?.legacyKey||legacyTeacherKey||"";
@@ -195,7 +206,8 @@ if(profile){
 }else{
   submitBtn.disabled=true;
   status.className="status err";
-  status.textContent="This teacher link is not recognized. Please use the personal link sent by Jorge Ceballos.";
+  const receivedId=params.get("id")||params.get("teacher")||"none";
+  status.textContent=`This teacher link is not recognized. Link code received: ${receivedId}`;
 }
 
 options.addEventListener("change",()=>{renderPeriods();saveDraft();updateProgress()});
@@ -345,7 +357,7 @@ form.addEventListener("submit",async e=>{
     causes:document.getElementById("causes").value.trim(),
     solutions:document.getElementById("solutions").value.trim(),
     totals:{...totals,mastersMeetsApproachesPercent:totals.assessed?Math.round(((totals.mastered+totals.met+totals.approached)/totals.assessed)*100):0},
-    createdAt:serverTimestamp(),source:"personal-teacher-portal-v3.0"
+    createdAt:serverTimestamp(),source:"personal-teacher-portal-v3.1"
   };
   submitBtn.disabled=true;submitBtn.textContent="Submitting…";
   try{
