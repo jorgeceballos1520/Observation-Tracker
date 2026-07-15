@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IDEA Spears Instructional Leadership Platform v2.3</title>
+<title>IDEA Spears Instructional Leadership Platform v2.7</title>
 <style>
 :root{--navy:#17283c;--navy2:#253f5b;--paper:#f5f3ed;--card:#fff;--line:#dedbd1;--muted:#667487;--blue:#1677b8;--gold:#c9972d;--goldbg:#fbf0d8;--red:#b94831;--redbg:#f9e4dd;--green:#39734b;--greenbg:#e3f0e6;--purple:#654ea3;--purplebg:#eee9fb;--shadow:0 7px 22px rgba(24,40,60,.08)}
 *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--navy);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
@@ -41,6 +41,19 @@ table{width:100%;border-collapse:collapse;font-size:12.5px}th,td{padding:9px;bor
 .ring:before{content:"";position:absolute;width:56px;height:56px;border-radius:50%;background:#fff}
 .ring strong{position:relative}.ring-label{text-align:center;font-size:10.5px;color:var(--muted);margin-top:5px;font-weight:700}
 .ring.approaches{--ring:#c9972d}.ring.meets{--ring:#1677b8}.ring.masters{--ring:#39734b}.overall-chart{border-left:5px solid var(--purple)}
+
+
+.trend-bars{display:grid;gap:10px;margin-top:12px}
+.trend-bar-row{display:grid;grid-template-columns:minmax(120px,1.3fr) minmax(150px,3fr) 48px;gap:10px;align-items:center}
+.trend-bar-label{display:grid;font-size:11px;color:var(--muted)}
+.trend-bar-label b{font-size:12px;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trend-bar-track{height:16px;background:#e9ecef;border-radius:999px;overflow:hidden}
+.trend-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:999px;min-width:2px}
+.trend-bar-value{text-align:right;font-size:12px;font-weight:800}
+@media(max-width:760px){
+  .trend-bar-row{grid-template-columns:1fr 48px}
+  .trend-bar-label{grid-column:1/-1}
+}
 
 @media print{aside,.no-print,.delete,.statusSelect,.goalStatusSelect{display:none!important}main{padding:0!important;max-width:none!important}.panel,.card,.stat{box-shadow:none!important;break-inside:avoid}.panel{border:1px solid #ddd!important}body{background:#fff!important}.presentation{padding:0!important}.presentation h1{font-size:24px}table{font-size:11px}}
 @media(max-width:900px){#app{display:block}aside{position:static;width:auto;height:auto}main{padding:20px}.stats,.two,.three,.four,.gg,.ocs{grid-template-columns:1fr}.page-head{display:block}.page-head .btn{margin-top:10px}}
@@ -319,9 +332,32 @@ function dashboard(){
 }
 
 function teacherPage(id){
-  const t=teacher(id),os=obsFor(id),ets=etFor(id),xs=examsFor(id),latestET=ets[0],latestExam=xs[0];
+  const t=teacher(id),os=obsFor(id),xs=examsFor(id),latestExam=xs[0];
+  const overallET=overallETForTeacher(id);
+
   return `<div class="page-head"><div><button class="btn no-print" id="back">&larr; Dashboard</button><h2 class="serif" style="margin-top:12px">${esc(t.name)}</h2><div class="sub">${esc(t.subject)}</div></div>${!t.vacancy?`<div class="no-print"><button class="btn" id="newET">+ Exit Ticket</button> <button class="btn" id="newExam">+ Exam Data</button> <button class="btn btn-primary" id="newObs">+ Observation</button></div>`:""}</div>
-  ${latestET?etSummary(latestET):""}
+
+  ${overallET?`
+    <div class="panel">
+      <h3>Latest Overall Exit Ticket &middot; ${fmt(overallET.date)}</h3>
+      <div class="sub">${esc(overallET.assessmentName)} &middot; ${overallET.periods} period${overallET.periods===1?"":"s"} combined</div>
+      <div class="four" style="margin-top:10px">
+        <div class="level approach"><strong>${overallET.approachesPlus}%</strong><span>Approaches+</span></div>
+        <div class="level meet"><strong>${overallET.meetsPlus}%</strong><span>Meets+</span></div>
+        <div class="level master"><strong>${overallET.mastersPercent}%</strong><span>Masters</span></div>
+        <div class="level notmeet"><strong>${overallET.notMeet}</strong><span>Did Not Meet</span></div>
+      </div>
+      <div class="row"><span>Total students assessed</span><b>${overallET.assessed}</b></div>
+      <div class="row"><span>Total Masters</span><b>${overallET.master}</b></div>
+      <div class="row"><span>Total Meets</span><b>${overallET.meet}</b></div>
+      <div class="row"><span>Total Approaches</span><b>${overallET.approach}</b></div>
+      <div class="two" style="margin-top:12px">
+        <div><span class="label">Combined Misconceptions</span><div class="evidence">${safeTextList(overallET.misconceptions)}</div></div>
+        <div><span class="label">Combined Next Steps</span><div class="evidence">${safeTextList(overallET.nextSteps)}</div></div>
+      </div>
+    </div>
+  `:""}
+
   ${latestExam?examSummary(latestExam):""}
   <div class="panel"><h3>Observation &amp; Coaching History</h3>${os.length?os.map(obsCard).join(""):`<div class="empty">No observation records yet.</div>`}</div>`;
 }
@@ -438,6 +474,148 @@ function submissionMasteryCharts(submission){
   </div>`;
 }
 
+
+function uniqueNonEmpty(values){
+  return [...new Set(values.map(v=>String(v||"").trim()).filter(Boolean))];
+}
+
+function overallETForTeacher(id){
+  const rows=etFor(id);
+  if(!rows.length)return null;
+
+  const latest=rows[0];
+  const latestKey=latest.sourceId||`${latest.date||""}|${latest.assessmentName||""}`;
+
+  const sameSubmission=rows.filter(e=>{
+    const key=e.sourceId||`${e.date||""}|${e.assessmentName||""}`;
+    return key===latestKey;
+  });
+
+  const totals=sameSubmission.reduce((a,e)=>({
+    assessed:a.assessed+totalET(e),
+    master:a.master+(+e.master||0),
+    meet:a.meet+(+e.meet||0),
+    approach:a.approach+(+e.approach||0),
+    notMeet:a.notMeet+(+e.notMeet||0)
+  }),{assessed:0,master:0,meet:0,approach:0,notMeet:0});
+
+  return {
+    date:latest.date||"",
+    assessmentName:latest.assessmentName||"Exit Ticket",
+    periods:sameSubmission.length,
+    ...totals,
+    approachesPlus:totals.assessed?Math.round((totals.master+totals.meet+totals.approach)/totals.assessed*100):0,
+    meetsPlus:totals.assessed?Math.round((totals.master+totals.meet)/totals.assessed*100):0,
+    mastersPercent:totals.assessed?Math.round(totals.master/totals.assessed*100):0,
+    misconceptions:uniqueNonEmpty(sameSubmission.map(e=>e.misconceptions)),
+    nextSteps:uniqueNonEmpty(sameSubmission.map(e=>e.nextSteps||e.solutions))
+  };
+}
+
+function groupedETTrend(id){
+  const rows=etFor(id);
+  const groups={};
+
+  rows.forEach(e=>{
+    const key=e.sourceId||`${e.date||""}|${e.assessmentName||""}`;
+    (groups[key]||(groups[key]=[])).push(e);
+  });
+
+  return Object.values(groups).map(records=>{
+    const totals=records.reduce((a,e)=>({
+      assessed:a.assessed+totalET(e),
+      master:a.master+(+e.master||0),
+      meet:a.meet+(+e.meet||0),
+      approach:a.approach+(+e.approach||0)
+    }),{assessed:0,master:0,meet:0,approach:0});
+
+    return {
+      date:records[0].date||"",
+      label:records[0].assessmentName||"Exit Ticket",
+      value:totals.assessed
+        ? Math.round((totals.master+totals.meet+totals.approach)/totals.assessed*100)
+        : 0
+    };
+  }).sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+}
+
+function groupedExamTrend(id){
+  const rows=examsFor(id);
+  const groups={};
+
+  rows.forEach(e=>{
+    const key=e.sourceId||`${e.date||""}|${e.examName||""}`;
+    (groups[key]||(groups[key]=[])).push(e);
+  });
+
+  return Object.values(groups).map(records=>({
+    date:records[0].date||"",
+    label:records[0].examName||"Exam",
+    value:records.length
+      ? Math.round(records.reduce((sum,e)=>sum+(Number(e.proficiency)||0),0)/records.length)
+      : 0
+  })).sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+}
+
+function goalTrend(id){
+  return goalsFor(id).map(g=>({
+    date:g.startDate||g.targetDate||"",
+    label:g.title||"Development Goal",
+    value:g.status==="Met"?100:g.status==="In Progress"?50:0
+  })).sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+}
+
+function safeTextList(items){
+  return items&&items.length
+    ? `<ul>${items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`
+    : "—";
+}
+
+function trendBars(title,description,items){
+  if(!items.length){
+    return `<div class="panel"><h3>${esc(title)}</h3><div class="empty">No data yet.</div></div>`;
+  }
+
+  return `<div class="panel">
+    <h3>${esc(title)}</h3>
+    <div class="small muted">${esc(description)}</div>
+    <div class="trend-bars">
+      ${items.map(item=>`
+        <div class="trend-bar-row">
+          <div class="trend-bar-label">
+            <span>${fmt(item.date)}</span>
+            <b>${esc(item.label)}</b>
+          </div>
+          <div class="trend-bar-track">
+            <div class="trend-bar-fill" style="width:${Math.max(0,Math.min(100,item.value))}%"></div>
+          </div>
+          <div class="trend-bar-value">${Math.round(item.value)}%</div>
+        </div>
+      `).join("")}
+    </div>
+  </div>`;
+}
+
+function progressionCharts(id){
+  return `<div class="three">
+    ${trendBars(
+      "Exit Ticket Progression",
+      "Overall Approaches+ across all submitted periods.",
+      groupedETTrend(id)
+    )}
+    ${trendBars(
+      "Exam Progression",
+      "Average overall proficiency for each exam submission.",
+      groupedExamTrend(id)
+    )}
+    ${trendBars(
+      "Developmental Goal Progression",
+      "Not Started = 0%, In Progress = 50%, Met = 100%.",
+      goalTrend(id)
+    )}
+  </div>`;
+}
+
 function progressList(){
   return `<div class="page-head"><div><h2 class="serif">Progress Reports</h2><div class="sub">Pick a teacher to see their goal progress, GET rubric growth, GBF skill development, exit ticket, and exam trends over time.</div></div></div>
   <div class="grid">${TEACHERS.filter(t=>!t.vacancy).map(t=>{
@@ -450,11 +628,14 @@ function teacherProgressPage(id){
   const t=teacher(id);
   const goals=goalsFor(id);
   const os=[...obsFor(id)].reverse();
-  const ets=[...etFor(id)].reverse();
   const xs=[...examsFor(id)].reverse();
-  const etPcts=ets.map(e=>pct((+e.master||0)+(+e.meet||0)+(+e.approach||0),totalET(e)));
+  const overallET=overallETForTeacher(id);
   const examPcts=xs.map(x=>+x.proficiency||0);
   const ratedObs=os.filter(o=>o.rating&&o.rating!=="Not Rated");
+
+  const latestCloud=[...state.exitTickets,...state.exams]
+    .filter(x=>x.teacherId===id && x.cloudSubmission && Array.isArray(x.periods))
+    .sort((a,b)=>(b.date||"").localeCompare(a.date||""))[0];
 
   return `<div class="page-head no-print"><div><button class="btn" id="backProgress">&larr; Progress Reports</button><h2 class="serif" style="margin-top:12px">${esc(t.name)}'s Progress Report</h2><div class="sub">${esc(t.subject)}</div></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
@@ -466,34 +647,41 @@ function teacherProgressPage(id){
 
   <div class="presentation">
   <div class="entry-head" style="align-items:center;margin-bottom:6px"><img src="${MASCOT_URI}" alt="IDEA Spears Scorpions" style="width:54px;height:auto"><div><h1 class="serif" style="margin:0">${esc(t.name)} \u2014 Progress Report</h1><div class="sub">IDEA Spears &middot; ${fmt(new Date().toISOString().slice(0,10))}</div></div></div>
+
   <div class="stats">
-    <div class="stat"><b>${etPcts.length?etPcts[etPcts.length-1]+"%":"\u2014"}</b><span>Latest ET M+M+A</span></div>
-    <div class="stat"><b>${examPcts.length?examPcts[examPcts.length-1]+"%":"\u2014"}</b><span>Latest exam proficiency</span></div>
-    <div class="stat"><b>${ratedObs.length?esc(ratedObs[ratedObs.length-1].rating):"\u2014"}</b><span>Most recent GET rating</span></div>
+    <div class="stat"><b>${overallET?overallET.approachesPlus+"%":"\u2014"}</b><span>Latest ET Approaches+</span></div>
+    <div class="stat"><b>${overallET?overallET.meetsPlus+"%":"\u2014"}</b><span>Latest ET Meets+</span></div>
+    <div class="stat"><b>${overallET?overallET.mastersPercent+"%":"\u2014"}</b><span>Latest ET Masters</span></div>
     <div class="stat"><b>${goals.filter(g=>g.status==="Met").length}/${goals.length}</b><span>Goals met</span></div>
     <div class="stat"><b>${os.length}</b><span>Total coaching records</span></div>
   </div>
 
-  ${(()=>{
-    const latestCloud=[...state.exitTickets,...state.exams]
-      .filter(x=>x.teacherId===id && x.cloudSubmission && Array.isArray(x.periods))
-      .sort((a,b)=>(b.date||"").localeCompare(a.date||""))[0];
-    return submissionMasteryCharts(latestCloud);
-  })()}
+  ${overallET?`
+    <div class="panel">
+      <h3>Latest Overall Exit Ticket</h3>
+      <div class="meta">${fmt(overallET.date)} &middot; ${esc(overallET.assessmentName)} &middot; ${overallET.periods} period${overallET.periods===1?"":"s"} combined</div>
+      <div class="four" style="margin-top:10px">
+        <div class="level approach"><strong>${overallET.approachesPlus}%</strong><span>Approaches+</span></div>
+        <div class="level meet"><strong>${overallET.meetsPlus}%</strong><span>Meets+</span></div>
+        <div class="level master"><strong>${overallET.mastersPercent}%</strong><span>Masters</span></div>
+        <div class="level notmeet"><strong>${overallET.notMeet}</strong><span>Did Not Meet</span></div>
+      </div>
+      <div class="two" style="margin-top:12px">
+        <div><span class="label">Combined Misconceptions</span><div class="evidence">${safeTextList(overallET.misconceptions)}</div></div>
+        <div><span class="label">Combined Next Steps</span><div class="evidence">${safeTextList(overallET.nextSteps)}</div></div>
+      </div>
+    </div>
+  `:`<div class="panel"><div class="empty">No exit ticket data yet.</div></div>`}
+
+  ${submissionMasteryCharts(latestCloud)}
+
+  <div class="panel"><h3>Performance Progression</h3><div class="small muted">Longer bars indicate stronger performance. Read each chart chronologically to see whether results are moving up or down.</div></div>
+  ${progressionCharts(id)}
 
   <div class="panel"><h3>Development Goals</h3>
   ${goals.length?`<table><thead><tr><th>Goal</th><th>Category</th><th>Target Date</th><th>Status</th><th class="no-print"></th></tr></thead><tbody>
     ${goals.map(g=>`<tr><td>${esc(g.title)}<div class="small muted">${esc(g.notes||"")}</div></td><td>${esc(g.category)}</td><td>${fmt(g.targetDate)}</td><td><select class="goalStatusSelect" data-id="${g.id}">${GOAL_STATUS.map(s=>`<option ${s===g.status?"selected":""}>${s}</option>`).join("")}</select></td><td class="no-print"><button class="btn btn-danger delete" data-kind="goals" data-id="${g.id}">Delete</button></td></tr>`).join("")}
   </tbody></table>`:`<div class="empty">No goals set yet for ${esc(t.name)}.</div>`}
-  </div>
-
-  <div class="two">
-    <div class="panel"><h3>Exit Ticket Progression</h3>
-    ${ets.length?`<div class="row"><span>Trend since first entry</span>${trendArrow(etPcts[0],etPcts[etPcts.length-1])}</div><table><thead><tr><th>Date</th><th>Objective / Period</th><th>M+M+A %</th></tr></thead><tbody>${ets.map((e,i)=>`<tr><td>${fmt(e.date)}</td><td>${esc(e.objective)}<div class="small muted">Period ${esc(e.period)}</div></td><td><b>${etPcts[i]}%</b></td></tr>`).join("")}</tbody></table>`:`<div class="empty">No exit ticket data yet.</div>`}
-    </div>
-    <div class="panel"><h3>Exam Progression</h3>
-    ${xs.length?`<div class="row"><span>Trend since first entry</span>${trendArrow(examPcts[0],examPcts[examPcts.length-1])}</div><table><thead><tr><th>Date</th><th>Exam / Period</th><th>% Proficient</th></tr></thead><tbody>${xs.map((x,i)=>`<tr><td>${fmt(x.date)}</td><td>${esc(x.examName)}<div class="small muted">Period ${esc(x.period)}</div></td><td><b>${examPcts[i]}%</b></td></tr>`).join("")}</tbody></table>`:`<div class="empty">No exam data yet.</div>`}
-    </div>
   </div>
 
   <div class="panel"><h3>GET Rubric Progression</h3>
@@ -505,7 +693,6 @@ function teacherProgressPage(id){
   </div>
   </div>`;
 }
-
 
 function printProgressReport(){
   window.print();
