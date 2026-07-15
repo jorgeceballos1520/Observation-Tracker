@@ -53,7 +53,7 @@ textarea{min-height:92px;resize:vertical}
 <div class="app">
 <div class="topbar">
   <div class="brand">Instructional Leadership Platform</div>
-  <div class="version">Teacher Portal v2.2</div>
+  <div class="version">Teacher Portal v2.3</div>
 </div>
 
 <section class="hero">
@@ -78,7 +78,38 @@ textarea{min-height:92px;resize:vertical}
 <form id="portalForm">
 <section class="card">
   <h2><span class="step">1</span>Submission information</h2>
-  <div class="grid2"></div>
+  <div class="grid2">
+    <div class="field"><label>Date <span class="required">*</span></label><input id="submissionDate" type="date" required></div>
+    <div class="field"><label>Assessment or activity name <span class="required">*</span></label><input id="assessmentName" required placeholder="Example: ET 8/14, Unit 2 Exam, PLC Review"></div>
+  </div>
+  <div class="field">
+    <label>Submission type <span class="required">*</span></label>
+    <div class="type-grid">
+      <label class="type-card"><input type="radio" name="submissionType" value="Exit Ticket" required>Exit Ticket</label>
+      <label class="type-card"><input type="radio" name="submissionType" value="Exam/Assessment">Exam / Assessment</label>
+      <label class="type-card"><input type="radio" name="submissionType" value="PLC Data">PLC Data</label>
+    </div>
+  </div>
+  <div class="field"><label>Course / subject</label><input id="course" readonly></div>
+</section>
+
+<section class="card">
+  <h2><span class="step">2</span>Select instructional periods</h2>
+  <div class="hint">Conference and academic block should remain unselected unless instructional data is being reported for them.</div>
+  <div class="period-options" id="periodOptions" style="margin-top:12px"></div>
+</section>
+
+<section class="card" id="periodDataCard" style="display:none">
+  <h2><span class="step">3</span>Period data</h2>
+  <div id="periodsContainer"></div>
+</section>
+
+<section class="card">
+  <h2><span class="step">4</span>Instructional analysis</h2>
+  <div class="field"><label>Misconceptions <span class="required">*</span></label><textarea id="misconceptions" required placeholder="What specific misunderstandings or errors did students demonstrate?"></textarea></div>
+  <div class="field"><label>Outcome <span class="required">*</span></label><textarea id="outcome" required placeholder="What did the data show about what students learned and did not learn?"></textarea></div>
+  <div class="field"><label>Causes <span class="required">*</span></label><textarea id="causes" required placeholder="What do you believe contributed to these outcomes?"></textarea></div>
+  <div class="field"><label>Solutions <span class="required">*</span></label><textarea id="solutions" required placeholder="What instructional adjustments will you make?"></textarea></div>
   <div class="autosave" id="autosaveText">Draft saves automatically on this device.</div>
 </section>
 
@@ -307,7 +338,7 @@ form.addEventListener("submit",async e=>{
     causes:document.getElementById("causes").value.trim(),
     solutions:document.getElementById("solutions").value.trim(),
     totals:{...totals,mastersMeetsApproachesPercent:totals.assessed?Math.round(((totals.mastered+totals.met+totals.approached)/totals.assessed)*100):0},
-    createdAt:serverTimestamp(),source:"personal-teacher-portal-v2.2"
+    createdAt:serverTimestamp(),source:"personal-teacher-portal-v2.3"
   };
   submitBtn.disabled=true;submitBtn.textContent="Submitting…";
   try{
