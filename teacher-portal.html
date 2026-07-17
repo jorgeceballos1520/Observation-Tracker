@@ -45,12 +45,11 @@ body{
 }
 .brand-wrap{display:flex;align-items:center;gap:12px;min-width:0}
 .brand-logo{
-  width:52px;
-  height:52px;
-  border-radius:10px;
-  object-fit:cover;
-  background:#000;
-  border:1px solid rgba(255,255,255,.18)
+  width:290px;
+  max-width:48vw;
+  height:auto;
+  object-fit:contain;
+  display:block
 }
 .brand{font-weight:900;letter-spacing:.02em;line-height:1.05}
 .brand .em{color:var(--gold2)}
@@ -160,7 +159,7 @@ textarea{min-height:92px;resize:vertical}
   margin-bottom:5px
 }
 .badge{font-size:11px;background:#e7eff8;color:var(--blue);padding:6px 10px;border-radius:99px;font-weight:800}
-.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .type-card{
   border:1px solid var(--line);
   border-radius:12px;
@@ -226,7 +225,7 @@ textarea{min-height:92px;resize:vertical}
   .teacher-box .badge{display:inline-block;margin-top:12px}
   .hero h1{font-size:26px}
   .topbar{align-items:flex-start}
-  .brand-logo{width:44px;height:44px}
+  .brand-logo{width:230px;max-width:62vw;height:auto}
   .version{display:none}
 }
 @media(max-width:520px){
@@ -241,22 +240,19 @@ textarea{min-height:92px;resize:vertical}
 <div class="app">
 <div class="topbar">
   <div class="brand-wrap">
-    <img class="brand-logo" src="background-cover.png" alt="IDEA Spears College Prep">
-    <div class="brand">
-      STING<span class="em">'EM</span> Leadership Platform
-      <span class="brand-sub">IDEA Spears College Prep</span>
-    </div>
+    <img class="brand-logo" src="images/logo-horizontal.png" alt="STING'EM Leadership Platform">
+
   </div>
   <div class="top-actions">
     <a class="home-link" href="index.html" aria-label="Return to STING'EM Home">🏠 Home</a>
-    <div class="version">Teacher Portal v4.0</div>
+    <div class="version">Teacher Portal v4.1</div>
   </div>
 </div>
 
 <section class="hero">
   <div class="portal-kicker">Teacher Portal</div>
   <h1>Instructional Data Submission</h1>
-  <p>Submit Exit Ticket, assessment, or PLC data for selected instructional periods.</p>
+  <p>Submit Exit Ticket or assessment data for selected instructional periods.</p>
   <div class="progress-wrap">
     <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
     <div class="progress-label" id="progressLabel">Step 1 of 5</div>
@@ -264,13 +260,20 @@ textarea{min-height:92px;resize:vertical}
 </section>
 
 <section class="card identity-card" id="identityCard">
+  <div class="field" id="leadershipSelectorWrap" style="display:none">
+    <label for="leadershipTeacherSelect">Submitting on behalf of <span class="required">*</span></label>
+    <select id="leadershipTeacherSelect">
+      <option value="">Select a teacher</option>
+    </select>
+    <div class="hint" style="margin-top:6px">Leadership access only. The submission will be saved under the selected teacher's unique ID.</div>
+  </div>
   <div class="teacher-box">
     <div>
       <div class="teacher-label">Teacher profile</div>
-      <div class="teacher-name" id="teacherNameDisplay">Teacher link not recognized</div>
-      <div class="teacher-course" id="teacherCourseDisplay">Use a valid personal teacher link.</div>
+      <div class="teacher-name" id="teacherNameDisplay">Select a teacher</div>
+      <div class="teacher-course" id="teacherCourseDisplay">Choose the teacher for this submission.</div>
     </div>
-    <div class="badge" id="levelDisplay">Personal link</div>
+    <div class="badge" id="levelDisplay">Leadership access</div>
   </div>
 </section>
 
@@ -279,14 +282,17 @@ textarea{min-height:92px;resize:vertical}
   <h2><span class="step">1</span>Submission information</h2>
   <div class="grid2">
     <div class="field"><label>Date <span class="required">*</span></label><input id="submissionDate" type="date" required></div>
-    <div class="field"><label>Assessment or activity name <span class="required">*</span></label><input id="assessmentName" required placeholder="Example: ET 8/14, Unit 2 Exam, PLC Review"></div>
+    <div class="field"><label>Assessment or activity name <span class="required">*</span></label><input id="assessmentName" required placeholder="Example: ET 8/14 or Unit 2 Exam"></div>
+  </div>
+  <div class="field">
+    <label>TEK # <span class="required">*</span></label>
+    <input id="tekNumber" required placeholder="Example: 6.3D, 7.4A, or A.5B">
   </div>
   <div class="field">
     <label>Submission type <span class="required">*</span></label>
     <div class="type-grid">
       <label class="type-card"><input type="radio" name="submissionType" value="Exit Ticket" required>Exit Ticket</label>
       <label class="type-card"><input type="radio" name="submissionType" value="Exam/Assessment">Exam / Assessment</label>
-      <label class="type-card"><input type="radio" name="submissionType" value="PLC Data">PLC Data</label>
     </div>
   </div>
   <div class="field"><label>Course / subject</label><input id="course" readonly></div>
@@ -331,7 +337,7 @@ textarea{min-height:92px;resize:vertical}
 <footer class="site-footer">
   <strong>IDEA Spears College Prep</strong>
   <div class="motto">Embrace the Sting</div>
-  <div>STING'EM Leadership Platform • Teacher Portal v4.0</div>
+  <div>STING'EM Leadership Platform • Teacher Portal v4.1</div>
 </footer>
 </div>
 
@@ -382,10 +388,14 @@ function serverTimestamp(){
 const params=new URLSearchParams(location.search);
 const requestedTeacherId=(params.get("id")||"").trim().toUpperCase();
 const legacyTeacherKey=(params.get("teacher")||"").trim().toLowerCase();
-const teacherId=requestedTeacherId||TEACHER_ID_BY_LEGACY_KEY[legacyTeacherKey]||"";
-const profile=TEACHERS_BY_ID[teacherId]||null;
-const teacherKey=profile?.legacyKey||legacyTeacherKey||"";
-const draftKey="ilp-draft-"+(teacherId||teacherKey||"unknown");
+const requestedResolvedId=requestedTeacherId||TEACHER_ID_BY_LEGACY_KEY[legacyTeacherKey]||"";
+const hasTeacherParameter=Boolean(params.get("id")||params.get("teacher"));
+const personalLinkMode=Boolean(requestedResolvedId&&TEACHERS_BY_ID[requestedResolvedId]);
+
+let teacherId="";
+let profile=null;
+let teacherKey="";
+let draftKey="ilp-draft-leadership-unselected";
 
 const form=document.getElementById("portalForm");
 const options=document.getElementById("periodOptions");
@@ -395,23 +405,86 @@ const submitBtn=document.getElementById("submitBtn");
 const status=document.getElementById("status");
 const progressBar=document.getElementById("progressBar");
 const progressLabel=document.getElementById("progressLabel");
+const leadershipSelectorWrap=document.getElementById("leadershipSelectorWrap");
+const leadershipTeacherSelect=document.getElementById("leadershipTeacherSelect");
 
 document.getElementById("submissionDate").value=new Date().toISOString().slice(0,10);
 
-if(profile){
+function levelLabel(level){
+  return level==="6-7"?"Grades 6–7":
+         level==="8"?"Grade 8":
+         level==="9-12"?"Grades 9–12":
+         "Special schedule";
+}
+
+function populateLeadershipSelector(){
+  Object.entries(TEACHERS_BY_ID)
+    .sort((a,b)=>a[1].name.localeCompare(b[1].name))
+    .forEach(([id,p])=>{
+      const option=document.createElement("option");
+      option.value=id;
+      option.textContent=`${p.name} — ${p.course}`;
+      leadershipTeacherSelect.appendChild(option);
+    });
+}
+
+function activateTeacher(selectedId,{restore=true}={}){
+  teacherId=selectedId;
+  profile=TEACHERS_BY_ID[teacherId]||null;
+  teacherKey=profile?.legacyKey||"";
+  draftKey="ilp-draft-"+(teacherId||"leadership-unselected");
+
+  options.innerHTML="";
+  container.innerHTML="";
+  periodDataCard.style.display="none";
+  form.reset();
+  document.getElementById("submissionDate").value=new Date().toISOString().slice(0,10);
+  status.className="status";
+  status.textContent="";
+
+  if(!profile){
+    document.getElementById("teacherNameDisplay").textContent="Select a teacher";
+    document.getElementById("teacherCourseDisplay").textContent="Choose the teacher for this submission.";
+    document.getElementById("levelDisplay").textContent="Leadership access";
+    document.getElementById("course").value="";
+    submitBtn.disabled=true;
+    updateProgress();
+    return;
+  }
+
   document.getElementById("teacherNameDisplay").textContent=profile.name;
   document.getElementById("teacherCourseDisplay").textContent=profile.course;
-  document.getElementById("levelDisplay").textContent=profile.level==="6-7"?"Grades 6–7":profile.level==="8"?"Grade 8":profile.level==="9-12"?"Grades 9–12":"Special schedule";
+  document.getElementById("levelDisplay").textContent=personalLinkMode?"Personal link":levelLabel(profile.level);
   document.getElementById("course").value=profile.course;
+
   for(let p=1;p<=profile.maxPeriods;p++){
     options.insertAdjacentHTML("beforeend",`<label class="period-option"><input type="checkbox" value="${p}">Period ${p}</label>`);
   }
-  restoreDraft();
-}else{
+
+  submitBtn.disabled=false;
+  if(restore)restoreDraft();
+  updateProgress();
+}
+
+if(personalLinkMode){
+  leadershipSelectorWrap.style.display="none";
+  activateTeacher(requestedResolvedId);
+}else if(hasTeacherParameter){
+  leadershipSelectorWrap.style.display="none";
   submitBtn.disabled=true;
+  document.getElementById("teacherNameDisplay").textContent="Teacher link not recognized";
+  document.getElementById("teacherCourseDisplay").textContent="Use a valid personal teacher link.";
+  document.getElementById("levelDisplay").textContent="Invalid link";
   status.className="status err";
   const receivedId=params.get("id")||params.get("teacher")||"none";
   status.textContent=`This teacher link is not recognized. Link code received: ${receivedId}`;
+}else{
+  populateLeadershipSelector();
+  leadershipSelectorWrap.style.display="block";
+  activateTeacher("",{restore:false});
+  leadershipTeacherSelect.addEventListener("change",()=>{
+    activateTeacher(leadershipTeacherSelect.value);
+  });
 }
 
 options.addEventListener("change",()=>{renderPeriods();saveDraft();updateProgress()});
@@ -478,7 +551,7 @@ function validateCard(card){
 function updateProgress(){
   let step=1;
   const type=document.querySelector('input[name="submissionType"]:checked');
-  if(type&&document.getElementById("assessmentName").value.trim())step=2;
+  if(type&&document.getElementById("assessmentName").value.trim()&&document.getElementById("tekNumber").value.trim())step=2;
   if(options.querySelectorAll("input:checked").length)step=3;
   if(container.querySelector(".period-card"))step=4;
   if(document.getElementById("misconceptions").value.trim()&&document.getElementById("outcome").value.trim()&&document.getElementById("causes").value.trim()&&document.getElementById("solutions").value.trim())step=5;
@@ -489,6 +562,7 @@ function getDraft(){
   return{
     date:document.getElementById("submissionDate").value,
     assessmentName:document.getElementById("assessmentName").value,
+    tekNumber:document.getElementById("tekNumber").value,
     type:document.querySelector('input[name="submissionType"]:checked')?.value||"",
     selected:[...options.querySelectorAll("input:checked")].map(x=>x.value),
     periods:[...container.querySelectorAll(".period-card")].map(readCard),
@@ -514,6 +588,7 @@ function restoreDraft(){
     const d=JSON.parse(raw);
     document.getElementById("submissionDate").value=d.date||new Date().toISOString().slice(0,10);
     document.getElementById("assessmentName").value=d.assessmentName||"";
+    document.getElementById("tekNumber").value=d.tekNumber||"";
     if(d.type){const r=document.querySelector(`input[name="submissionType"][value="${d.type}"]`);if(r)r.checked=true}
     (d.selected||[]).forEach(v=>{const cb=options.querySelector(`input[value="${v}"]`);if(cb)cb.checked=true});
     renderPeriods();
@@ -545,7 +620,8 @@ form.addEventListener("submit",async e=>{
   e.preventDefault();
   status.className="status";
   const cards=[...container.querySelectorAll(".period-card")];
-  if(!profile||!cards.length){status.className="status err";status.textContent="Select at least one instructional period.";return}
+  if(!profile){status.className="status err";status.textContent="Select a teacher before submitting.";return}
+  if(!cards.length){status.className="status err";status.textContent="Select at least one instructional period.";return}
   const periods=cards.map(card=>({period:Number(card.dataset.period),...readCard(card)}));
   const mismatch=periods.find(p=>p.assessed!==p.mastered+p.met+p.approached+p.didNotMeet);
   if(mismatch){status.className="status err";status.textContent=`Correct the counts for Period ${mismatch.period} before submitting.`;return}
@@ -555,13 +631,14 @@ form.addEventListener("submit",async e=>{
     submissionDate:document.getElementById("submissionDate").value,
     submissionType:document.querySelector('input[name="submissionType"]:checked').value,
     assessmentName:document.getElementById("assessmentName").value.trim(),
+    tekNumber:document.getElementById("tekNumber").value.trim(),
     periods,
     misconceptions:document.getElementById("misconceptions").value.trim(),
     outcome:document.getElementById("outcome").value.trim(),
     causes:document.getElementById("causes").value.trim(),
     solutions:document.getElementById("solutions").value.trim(),
     totals:{...totals,mastersMeetsApproachesPercent:totals.assessed?Math.round(((totals.mastered+totals.met+totals.approached)/totals.assessed)*100):0},
-    createdAt:serverTimestamp(),source:"stingem-teacher-portal-v4.0"
+    createdAt:serverTimestamp(),source:"stingem-teacher-portal-v4.1"
   };
   submitBtn.disabled=true;submitBtn.textContent="Submitting…";
   try{
