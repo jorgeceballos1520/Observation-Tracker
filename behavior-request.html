@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Student Behavior Concern Form | IDEA Spears</title>
+<title>Student Behavior Concern Form v3.0 | IDEA Spears</title>
 <style>
 :root{--navy:#17283c;--paper:#f5f3ed;--card:#fff;--line:#dedbd1;--muted:#667487;--green:#39734b;--red:#b94831;--shadow:0 7px 22px rgba(24,40,60,.08)}
 *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--navy);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
@@ -35,9 +35,8 @@ input,select,textarea,button{font:inherit}input,select,textarea{width:100%;borde
 <form id="requestForm">
 <section class="card">
 <h2>Student Information</h2>
-<div class="grid4">
+<div class="grid3">
   <div class="field"><label>Student Name *</label><input id="studentName" required></div>
-  <div class="field"><label>Student ID *</label><input id="studentId" required></div>
   <div class="field"><label>Grade *</label><input id="gradeDisplay" disabled></div>
   <div class="field"><label>Homeroom / Advisory</label><input id="homeroom"></div>
 </div>
@@ -48,10 +47,6 @@ input,select,textarea,button{font:inherit}input,select,textarea{width:100%;borde
   <div class="field"><label>Location *</label><input id="location" required></div>
 </div>
 
-<h3>Student Services</h3>
-<div class="checks">
-  <label class="check"><input type="checkbox" name="services" value="SPED (IEP)">SPED (IEP)</label><label class="check"><input type="checkbox" name="services" value="504">504</label><label class="check"><input type="checkbox" name="services" value="Emergent Bilingual (EB)">Emergent Bilingual (EB)</label><label class="check"><input type="checkbox" name="services" value="Dyslexia">Dyslexia</label><label class="check"><input type="checkbox" name="services" value="Gifted & Talented">Gifted & Talented</label><label class="check"><input type="checkbox" name="services" value="MTSS / RTI">MTSS / RTI</label><label class="check"><input type="checkbox" name="services" value="Foster Care">Foster Care</label><label class="check"><input type="checkbox" name="services" value="McKinney-Vento">McKinney-Vento</label>
-</div>
 </section>
 
 <section class="card">
@@ -148,6 +143,9 @@ input,select,textarea,button{font:inherit}input,select,textarea{width:100%;borde
 
 <section class="card">
 <h2>Teacher Recommendation</h2>
+<div class="hint" style="margin-bottom:12px">
+Teachers may recommend administrator review but may not assign ISS or OSS. The system will automatically prioritize the request by urgency.
+</div>
 <div class="field"><label>Recommended Next Step *</label>
 <select id="suggestedAction" required>
   <option value="">Select</option>
@@ -193,64 +191,117 @@ if(!valid){
 const checkedValues=name=>[...document.querySelectorAll(`input[name="${name}"]:checked`)].map(x=>x.value);
 const radioValue=name=>document.querySelector(`input[name="${name}"]:checked`)?.value||"";
 
-requestForm.onsubmit=async e=>{
-  e.preventDefault();
-  submitBtn.disabled=true;submitBtn.textContent="Submitting…";
 
-  const record={
-    portalKey:key,
-    grade,
-    studentName:studentName.value.trim(),
-    studentId:studentId.value.trim(),
-    homeroom:homeroom.value.trim(),
-    submittedByName:submittedByName.value.trim(),
-    incidentDate:incidentDate.value,
-    incidentTime:incidentTime.value,
-    location:location.value.trim(),
-    studentServices:checkedValues("services"),
-    isSped:checkedValues("services").includes("SPED (IEP)")?"Yes":"No",
-    behaviorCategory:behaviorCategory.value,
-    severity:radioValue("severity"),
-    concernSummary:`${behaviorCategory.value} — ${radioValue("severity")}`,
-    incidentDescription:incidentDescription.value.trim(),
-    staffActions:checkedValues("staffActions"),
-    studentResponse:studentResponse.value,
-    studentWitnesses:studentWitnesses.value.trim(),
-    staffWitnesses:staffWitnesses.value.trim(),
-    evidence:checkedValues("evidence"),
-    parentContacted:radioValue("parentContacted"),
-    parentContactBy:parentContactBy.value.trim(),
-    contactDate:contactDate.value,
-    contactTime:contactTime.value,
-    contactMethod:contactMethod.value,
-    parentContactNotes:parentContactNotes.value.trim(),
-    previousInterventions:checkedValues("previousInterventions"),
-    interventionsAttempted:checkedValues("previousInterventions").join(", "),
-    possibleTrigger:possibleTrigger.value,
-    interruptedInstruction:interruptedInstruction.value,
-    minutesInterrupted:Number(minutesInterrupted.value)||0,
-    othersAffected:othersAffected.value,
-    suggestedAction:suggestedAction.value,
-    additionalNotes:additionalNotes.value.trim(),
-    status:"Open",
-    submittedAt:firebase.firestore.FieldValue.serverTimestamp()
-  };
+function calculateUrgency(category,severity,recommendation,response,interrupted){
+  const criticalCategories=["Fighting","Aggression","Bullying","Harassment","Vaping","Theft","Property Damage"];
+  if(
+    severity==="Major" ||
+    recommendation==="Administrator Review - Possible OSS" ||
+    (criticalCategories.includes(category) && response==="Escalated")
+  ) return "Critical";
+
+  if(
+    severity==="Moderate" ||
+    recommendation==="Administrator Review - Possible ISS" ||
+    recommendation==="Administrator Follow-up" ||
+    criticalCategories.includes(category) ||
+    interrupted==="Yes"
+  ) return "High";
+
+  if(
+    recommendation==="Parent Conference" ||
+    recommendation==="Behavior Contract" ||
+    recommendation==="Counselor" ||
+    recommendation==="Lunch Detention" ||
+    recommendation==="After School Detention"
+  ) return "Moderate";
+
+  return "Routine";
+}
+
+const urgencyRank={Critical:4,High:3,Moderate:2,Routine:1};
+
+const formEl=document.getElementById("requestForm");
+const submitButton=document.getElementById("submitBtn");
+const messageEl=document.getElementById("message");
+const field=id=>document.getElementById(id);
+
+formEl.addEventListener("submit",async e=>{
+  e.preventDefault();
+  submitButton.disabled=true;
+  submitButton.textContent="Submitting…";
+  messageEl.className="message";
+  messageEl.textContent="";
 
   try{
-    await db.collection("disciplineRequests").add(record);
-    message.textContent="Behavior concern submitted successfully.";
-    message.className="message show ok";
-    requestForm.reset();
-    gradeDisplay.value=grade;
-    incidentDate.value=new Date().toISOString().slice(0,10);
+    const previous=checkedValues("previousInterventions");
+
+    const record={
+      portalKey:key,
+      grade,
+      studentName:field("studentName").value.trim(),
+      homeroom:field("homeroom").value.trim(),
+      submittedByName:field("submittedByName").value.trim(),
+      incidentDate:field("incidentDate").value,
+      incidentTime:field("incidentTime").value,
+      location:field("location").value.trim(),
+      behaviorCategory:field("behaviorCategory").value,
+      severity:radioValue("severity"),
+      concernSummary:`${field("behaviorCategory").value} — ${radioValue("severity")}`,
+      incidentDescription:field("incidentDescription").value.trim(),
+      staffActions:checkedValues("staffActions"),
+      studentResponse:field("studentResponse").value,
+      studentWitnesses:field("studentWitnesses").value.trim(),
+      staffWitnesses:field("staffWitnesses").value.trim(),
+      evidence:checkedValues("evidence"),
+      parentContacted:radioValue("parentContacted"),
+      parentContactBy:field("parentContactBy").value.trim(),
+      contactDate:field("contactDate").value,
+      contactTime:field("contactTime").value,
+      contactMethod:field("contactMethod").value,
+      parentContactNotes:field("parentContactNotes").value.trim(),
+      previousInterventions:previous,
+      interventionsAttempted:previous.join(", "),
+      possibleTrigger:field("possibleTrigger").value,
+      interruptedInstruction:field("interruptedInstruction").value,
+      minutesInterrupted:Number(field("minutesInterrupted").value)||0,
+      othersAffected:field("othersAffected").value,
+      suggestedAction:field("suggestedAction").value,
+      additionalNotes:field("additionalNotes").value.trim(),
+      urgency:calculateUrgency(
+        field("behaviorCategory").value,
+        radioValue("severity"),
+        field("suggestedAction").value,
+        field("studentResponse").value,
+        field("interruptedInstruction").value
+      ),
+      status:"Open",
+      submittedAt:firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    await Promise.race([
+      db.collection("disciplineRequests").add(record),
+      new Promise((_,reject)=>setTimeout(
+        ()=>reject(new Error("The submission timed out. Check your internet connection and Firebase rules, then try again.")),
+        15000
+      ))
+    ]);
+
+    messageEl.textContent="Behavior concern submitted successfully.";
+    messageEl.className="message show ok";
+    formEl.reset();
+    field("gradeDisplay").value=grade;
+    field("incidentDate").value=new Date().toISOString().slice(0,10);
+    window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
   }catch(err){
-    message.textContent=err.message;
-    message.className="message show err";
+    console.error("Behavior form submission error:",err);
+    messageEl.textContent=`Submission failed: ${err.message||"Unknown error"}`;
+    messageEl.className="message show err";
   }finally{
-    submitBtn.disabled=false;
-    submitBtn.textContent="Submit Behavior Concern";
+    submitButton.disabled=false;
+    submitButton.textContent="Submit Behavior Concern";
   }
-};
+});
 </script>
 </body>
 </html>
