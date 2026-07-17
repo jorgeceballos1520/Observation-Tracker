@@ -200,8 +200,9 @@ const auth=firebase.auth();
 const provider=new firebase.auth.GoogleAuthProvider();
 
 const AUTHORIZED_GTLS={
-  "lashawnyoungblood7@gmail.com":{name:"Ms. Youngblood",grade:"9"},
-  "vbenitez1004@gmail.com":{name:"Ms. Flores",grade:"10"}
+  "lashawnyoungblood7@gmail.com":{name:"Ms. Youngblood",grade:"9",role:"GTL"},
+  "vbenitez1004@gmail.com":{name:"Ms. Flores",grade:"10",role:"GTL"},
+  "jorge.ceballos1520@gmail.com":{name:"Jorge Ceballos",grade:"9",role:"Administrator"}
 };
 
 let currentGtl=null;
@@ -259,7 +260,7 @@ auth.onAuthStateChanged(user=>{
   submittedByName.readOnly=true;
   incidentDate.value=new Date().toISOString().slice(0,10);
   portalContent.style.display="block";
-  signedInUser.innerHTML=`${access.name} · Grade ${access.grade} · ${email} · <button type="button" id="signOutTop">Sign out</button>`;
+  signedInUser.innerHTML=`${access.name} · ${access.role==="Administrator"?"Administrator Access":`Grade ${access.grade}`} · ${email} · <button type="button" id="signOutTop">Sign out</button>`;
   document.getElementById("signOutTop").addEventListener("click",()=>auth.signOut());
 });
 
@@ -352,7 +353,7 @@ formEl.addEventListener("submit",async e=>{
         field("studentResponse").value,
         field("interruptedInstruction").value
       ),
-      status:"Open",accessRole:"GTL",
+      status:"Open",accessRole:currentGtl?.role||"GTL",
       submittedAt:firebase.firestore.FieldValue.serverTimestamp()
     };
 
