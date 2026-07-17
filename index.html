@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STING'EM Leadership Platform</title>
+<style>
+:root{
+--navy:#13263a;
+--gold:#c9a227;
+--paper:#f4f1ea;
+--card:#fff;
+--line:#ddd;
+}
+*{box-sizing:border-box}
+body{
+margin:0;
+font-family:Segoe UI,Arial,sans-serif;
+background:#eef2f6;
+color:var(--navy);
+}
+header{
+background:linear-gradient(135deg,#13263a,#214564);
+color:white;
+padding:30px;
+text-align:center;
+}
+header img{
+max-width:120px;
+border-radius:12px;
+margin-bottom:15px;
+}
+header h1{margin:0;font-size:2.3rem}
+header h2{margin:.3rem 0;color:#f0d97b;font-weight:600}
+.container{
+max-width:1200px;
+margin:auto;
+padding:30px 20px;
+}
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+}
+.card{
+background:var(--card);
+border:1px solid var(--line);
+border-radius:16px;
+padding:25px;
+text-decoration:none;
+color:inherit;
+box-shadow:0 8px 24px rgba(0,0,0,.08);
+transition:.2s;
+}
+.card:hover{
+transform:translateY(-4px);
+}
+.card h3{
+margin-top:0;
+color:var(--navy);
+}
+.sting{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:15px;
+margin:35px 0;
+}
+.sting div{
+background:white;
+border-left:6px solid var(--gold);
+padding:18px;
+border-radius:12px;
+box-shadow:0 4px 14px rgba(0,0,0,.08);
+}
+.snapshot{
+margin-top:35px;
+background:white;
+padding:25px;
+border-radius:16px;
+box-shadow:0 4px 14px rgba(0,0,0,.08);
+}
+.stats{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+gap:15px;
+}
+.stat{
+background:#f8f8f8;
+padding:15px;
+border-radius:10px;
+text-align:center;
+}
+footer{
+text-align:center;
+padding:30px;
+color:#666;
+}
+</style>
+</head>
+<body>
+
+<header>
+<img src="background-cover.png" alt="IDEA Spears">
+<h1>STING'EM Leadership Platform</h1>
+<h2>IDEA Spears College Prep</h2>
+<p><strong>Embrace the Sting</strong></p>
+</header>
+
+<div class="container">
+
+<h2>STING'EM Framework</h2>
+
+<div class="sting">
+<div><strong>S</strong><br>Student Success</div>
+<div><strong>T</strong><br>Teacher Development</div>
+<div><strong>I</strong><br>Instructional Leadership</div>
+<div><strong>N</strong><br>Navigation Through Data</div>
+<div><strong>G</strong><br>Growth & Accountability</div>
+<div><strong>'EM</strong><br>Educational Management</div>
+</div>
+
+<h2>Platform Modules</h2>
+
+<div class="grid">
+
+<a class="card" href="teacher-portal.html">
+<h3>👩‍🏫 Teacher Portal</h3>
+<p>Exit Tickets, Exams, PLC submissions and instructional analysis.</p>
+</a>
+
+<a class="card" href="dashboard.html">
+<h3>📊 Administrative Dashboard</h3>
+<p>Leadership analytics, teacher monitoring and reports.</p>
+</a>
+
+<a class="card" href="behavior.html">
+<h3>🎓 Student Behavior</h3>
+<p>Behavior documentation, interventions and consequences.</p>
+</a>
+
+<a class="card" href="behavior-request.html">
+<h3>📝 Behavior Request</h3>
+<p>Grade Team Leader discipline referral form.</p>
+</a>
+
+<a class="card" href="#">
+<h3>👀 Observation Tracker</h3>
+<p><em>Coming Soon</em></p>
+</a>
+
+<a class="card" href="#">
+<h3>📈 Progress Reports</h3>
+<p><em>Coming Soon</em></p>
+</a>
+
+</div>
+
+<div class="snapshot">
+<h2>Today's Snapshot</h2>
+
+<div class="stats">
+<div class="stat"><h3>10</h3>Teachers</div>
+<div class="stat"><h3>0</h3>ET Submitted</div>
+<div class="stat"><h3>0</h3>Observations</div>
+<div class="stat"><h3>0</h3>Behavior Incidents</div>
+<div class="stat"><h3>0</h3>ISS</div>
+<div class="stat"><h3>0</h3>Parent Meetings</div>
+</div>
+
+</div>
+
+</div>
+
+<footer>
+STING'EM Leadership Platform v4.0<br>
+IDEA Spears College Prep
+</footer>
+
+</body>
+</html>
