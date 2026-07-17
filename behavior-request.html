@@ -16,12 +16,32 @@ input,select,textarea,button{font:inherit}input,select,textarea{width:100%;borde
 .checks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.check{display:flex;gap:7px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:9px;background:#faf9f5;font-size:12px}.check input{width:auto;margin-top:2px}
 .radios{display:flex;gap:15px;flex-wrap:wrap}.radio{display:flex;gap:6px;align-items:center;font-size:13px}.radio input{width:auto}
 .hint{font-size:11.5px;color:var(--muted);margin-top:5px}button{border:0;border-radius:8px;background:var(--navy);color:#fff;padding:11px 16px;font-weight:800;cursor:pointer}
-.message{display:none;padding:11px;border-radius:8px;margin-top:12px}.message.show{display:block}.ok{background:#e3f0e6;color:#245d35}.err{background:#f9e4dd;color:#78311f}
+.message{display:none;padding:11px;border-radius:8px;margin-top:12px}.topbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}.auth-user{font-size:12px;color:var(--muted)}.hidden{display:none!important}.message.show{display:block}.ok{background:#e3f0e6;color:#245d35}.err{background:#f9e4dd;color:#78311f}
 @media(max-width:760px){.grid2,.grid3,.grid4,.checks{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
+<div class="topbar">
+  <a href="index.html" style="text-decoration:none"><button type="button">🏠 Home</button></a>
+  <div id="signedInUser" class="auth-user"></div>
+</div>
+
+<section class="card" id="authCard">
+  <h2>GTL Sign-In</h2>
+  <p class="hint">Access is limited to the 9th and 10th grade team leaders.</p>
+  <button type="button" id="signInBtn">Sign in with Google</button>
+  <div id="authMessage" class="message"></div>
+</section>
+
+<section class="card" id="deniedCard" style="display:none">
+  <h2>Access Denied</h2>
+  <p>This Google account is not authorized to use the GTL Behavior Request Portal.</p>
+  <p class="hint">Please sign in with the authorized IDEA Spears GTL account or contact Jorge Ceballos.</p>
+  <button type="button" id="signOutDenied">Sign out</button>
+</section>
+
+<div id="portalContent" style="display:none">
 <section class="hero">
   <h1 style="margin:0;font-family:Georgia,serif">Student Behavior Concern Form</h1>
   <p style="margin:5px 0 0;color:#dce6ef">IDEA Spears · Grade <span id="gradeHeading"></span></p>
@@ -157,8 +177,10 @@ Teachers may recommend administrator review but may not assign ISS or OSS. The s
 </section>
 </form>
 </div>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 
@@ -174,19 +196,72 @@ const firebaseConfig={
 
 if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
-const params=new URLSearchParams(location.search);
-const grade=params.get("grade")||"";
-const key=params.get("key")||"";
-const valid=(grade==="9"&&key==="GTL9-SPEARS-2026")||(grade==="10"&&key==="GTL10-SPEARS-2026");
+const auth=firebase.auth();
+const provider=new firebase.auth.GoogleAuthProvider();
 
-gradeHeading.textContent=grade;
-gradeDisplay.value=grade;
-incidentDate.value=new Date().toISOString().slice(0,10);
+const AUTHORIZED_GTLS={
+  "lashawnyoungblood7@gmail.com":{name:"Ms. Youngblood",grade:"9"},
+  "vbenitez1004@gmail.com":{name:"Ms. Flores",grade:"10"}
+};
 
-if(!valid){
-  invalidCard.style.display="block";
-  requestForm.style.display="none";
-}
+let currentGtl=null;
+let grade="";
+
+const authCard=document.getElementById("authCard");
+const deniedCard=document.getElementById("deniedCard");
+const portalContent=document.getElementById("portalContent");
+const signedInUser=document.getElementById("signedInUser");
+const authMessage=document.getElementById("authMessage");
+
+document.getElementById("invalidCard").style.display="none";
+
+document.getElementById("signInBtn").addEventListener("click",async()=>{
+  authMessage.className="message";
+  authMessage.textContent="";
+  try{
+    await auth.signInWithPopup(provider);
+  }catch(err){
+    authMessage.textContent=`Sign-in failed: ${err.message||"Unknown error"}`;
+    authMessage.className="message show err";
+  }
+});
+
+document.getElementById("signOutDenied").addEventListener("click",()=>auth.signOut());
+
+auth.onAuthStateChanged(user=>{
+  authCard.style.display="none";
+  deniedCard.style.display="none";
+  portalContent.style.display="none";
+  signedInUser.textContent="";
+
+  if(!user){
+    authCard.style.display="block";
+    currentGtl=null;
+    grade="";
+    return;
+  }
+
+  const email=(user.email||"").trim().toLowerCase();
+  const access=AUTHORIZED_GTLS[email];
+
+  if(!access){
+    deniedCard.style.display="block";
+    signedInUser.innerHTML=`${user.email||"Unknown account"} · <button type="button" id="signOutTop">Sign out</button>`;
+    document.getElementById("signOutTop").addEventListener("click",()=>auth.signOut());
+    return;
+  }
+
+  currentGtl={...access,email};
+  grade=access.grade;
+  gradeHeading.textContent=grade;
+  gradeDisplay.value=grade;
+  submittedByName.value=access.name;
+  submittedByName.readOnly=true;
+  incidentDate.value=new Date().toISOString().slice(0,10);
+  portalContent.style.display="block";
+  signedInUser.innerHTML=`${access.name} · Grade ${access.grade} · ${email} · <button type="button" id="signOutTop">Sign out</button>`;
+  document.getElementById("signOutTop").addEventListener("click",()=>auth.signOut());
+});
 
 const checkedValues=name=>[...document.querySelectorAll(`input[name="${name}"]:checked`)].map(x=>x.value);
 const radioValue=name=>document.querySelector(`input[name="${name}"]:checked`)?.value||"";
@@ -196,13 +271,13 @@ function calculateUrgency(category,severity,recommendation,response,interrupted)
   const criticalCategories=["Fighting","Aggression","Bullying","Harassment","Vaping","Theft","Property Damage"];
   if(
     severity==="Major" ||
-    recommendation==="Administrator Review - Possible OSS" ||
+    recommendation==="OSS" ||
     (criticalCategories.includes(category) && response==="Escalated")
   ) return "Critical";
 
   if(
     severity==="Moderate" ||
-    recommendation==="Administrator Review - Possible ISS" ||
+    recommendation==="ISS" ||
     recommendation==="Administrator Follow-up" ||
     criticalCategories.includes(category) ||
     interrupted==="Yes"
@@ -234,14 +309,16 @@ formEl.addEventListener("submit",async e=>{
   messageEl.textContent="";
 
   try{
+    if(!currentGtl||!auth.currentUser)throw new Error("Your authorized GTL session is no longer active. Please sign in again.");
     const previous=checkedValues("previousInterventions");
 
     const record={
-      portalKey:key,
       grade,
+      submittedByEmail:currentGtl?.email||"",
+      submittedByUid:auth.currentUser?.uid||"",
       studentName:field("studentName").value.trim(),
       homeroom:field("homeroom").value.trim(),
-      submittedByName:field("submittedByName").value.trim(),
+      submittedByName:currentGtl?.name||field("submittedByName").value.trim(),
       incidentDate:field("incidentDate").value,
       incidentTime:field("incidentTime").value,
       location:field("location").value.trim(),
@@ -275,7 +352,7 @@ formEl.addEventListener("submit",async e=>{
         field("studentResponse").value,
         field("interruptedInstruction").value
       ),
-      status:"Open",
+      status:"Open",accessRole:"GTL",
       submittedAt:firebase.firestore.FieldValue.serverTimestamp()
     };
 
@@ -291,6 +368,8 @@ formEl.addEventListener("submit",async e=>{
     messageEl.className="message show ok";
     formEl.reset();
     field("gradeDisplay").value=grade;
+    field("submittedByName").value=currentGtl?.name||"";
+    field("submittedByName").readOnly=true;
     field("incidentDate").value=new Date().toISOString().slice(0,10);
     window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
   }catch(err){
