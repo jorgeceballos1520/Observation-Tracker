@@ -3,60 +3,258 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Instructional Leadership Platform</title>
+<title>STING'EM Leadership Platform | Teacher Portal</title>
 <style>
 :root{
-  --navy:#13263a;--navy2:#1d3955;--paper:#f4f1ea;--card:#fff;--line:#ddd8cf;
-  --muted:#687789;--blue:#1e78b4;--green:#39734b;--red:#b94831;--gold:#c9a227;
-  --shadow:0 10px 30px rgba(19,38,58,.10)
+  --navy:#13263a;
+  --navy2:#1d3955;
+  --black:#111111;
+  --paper:#f5f2ea;
+  --card:#ffffff;
+  --line:#ddd8cf;
+  --muted:#687789;
+  --blue:#1e78b4;
+  --green:#39734b;
+  --red:#b94831;
+  --gold:#c9a227;
+  --gold2:#e3c24f;
+  --shadow:0 12px 32px rgba(19,38,58,.12)
 }
 *{box-sizing:border-box}
-body{margin:0;background:linear-gradient(180deg,#eef2f6 0,#f6f3ec 260px);color:var(--navy);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
-.app{max-width:1050px;margin:auto;padding:22px 16px 64px}
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-.brand{font-weight:900;letter-spacing:.02em}.version{font-size:12px;color:var(--muted)}
-.hero{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;border-radius:20px;padding:26px;box-shadow:var(--shadow);margin-bottom:16px}
-.hero h1{font-family:Georgia,serif;margin:0 0 6px;font-size:30px}.hero p{margin:0;color:#dbe4ec}
-.progress-wrap{margin-top:18px}.progress-track{height:8px;background:rgba(255,255,255,.22);border-radius:99px;overflow:hidden}.progress-bar{height:100%;width:20%;background:#fff;border-radius:99px;transition:.25s}.progress-label{font-size:12px;margin-top:7px;color:#dbe4ec}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow);margin-bottom:15px}
-.step{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#e8eff6;color:var(--blue);font-weight:800;margin-right:8px}
-h2{font-family:Georgia,serif;font-size:21px;margin:0 0 14px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px}.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
-.field{margin-bottom:13px}.field label{display:block;font-size:12px;font-weight:800;color:#566373;margin-bottom:6px}
-input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;background:#fff;color:var(--navy);font:inherit}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:
+    linear-gradient(rgba(245,242,234,.96),rgba(245,242,234,.96)),
+    radial-gradient(circle at top right,rgba(201,162,39,.18),transparent 34%);
+  color:var(--navy);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif
+}
+.app{max-width:1100px;margin:auto;padding:18px 16px 64px}
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  margin-bottom:14px;
+  padding:12px 14px;
+  border-radius:14px;
+  background:var(--black);
+  color:#fff;
+  box-shadow:var(--shadow)
+}
+.brand-wrap{display:flex;align-items:center;gap:12px;min-width:0}
+.brand-logo{
+  width:52px;
+  height:52px;
+  border-radius:10px;
+  object-fit:cover;
+  background:#000;
+  border:1px solid rgba(255,255,255,.18)
+}
+.brand{font-weight:900;letter-spacing:.02em;line-height:1.05}
+.brand .em{color:var(--gold2)}
+.brand-sub{display:block;font-size:11px;color:#d8d8d8;margin-top:4px;font-weight:600}
+.top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.home-link{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:9px 12px;
+  border-radius:10px;
+  background:var(--gold);
+  color:#111;
+  text-decoration:none;
+  font-size:13px;
+  font-weight:900
+}
+.home-link:hover{background:var(--gold2)}
+.version{font-size:12px;color:#d8d8d8;white-space:nowrap}
+.hero{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(135deg,var(--navy),var(--navy2));
+  color:#fff;
+  border-radius:20px;
+  padding:28px;
+  box-shadow:var(--shadow);
+  margin-bottom:16px
+}
+.hero:after{
+  content:"";
+  position:absolute;
+  width:220px;
+  height:220px;
+  right:-80px;
+  top:-95px;
+  border-radius:50%;
+  background:rgba(201,162,39,.18)
+}
+.hero h1{font-family:Georgia,serif;margin:0 0 7px;font-size:32px;position:relative;z-index:1}
+.hero p{margin:0;color:#dbe4ec;position:relative;z-index:1}
+.portal-kicker{
+  display:inline-block;
+  margin-bottom:10px;
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(201,162,39,.18);
+  color:#f3d875;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  position:relative;
+  z-index:1
+}
+.progress-wrap{margin-top:20px;position:relative;z-index:1}
+.progress-track{height:8px;background:rgba(255,255,255,.22);border-radius:99px;overflow:hidden}
+.progress-bar{height:100%;width:20%;background:linear-gradient(90deg,#fff,var(--gold2));border-radius:99px;transition:.25s}
+.progress-label{font-size:12px;margin-top:7px;color:#dbe4ec}
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:20px;
+  box-shadow:var(--shadow);
+  margin-bottom:15px
+}
+.identity-card{border-top:5px solid var(--gold)}
+.step{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  background:#e8eff6;
+  color:var(--blue);
+  font-weight:900;
+  margin-right:8px
+}
+h2{font-family:Georgia,serif;font-size:22px;margin:0 0 14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:12px;font-weight:800;color:#566373;margin-bottom:6px}
+input,select,textarea{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:11px;
+  background:#fff;
+  color:var(--navy);
+  font:inherit
+}
 input:focus,select:focus,textarea:focus{outline:2px solid #b9d8ee;border-color:var(--blue)}
+input[readonly]{background:#f4f5f6;color:#4e5b68}
 textarea{min-height:92px;resize:vertical}
 .teacher-box{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.teacher-name{font-size:24px;font-weight:900}.teacher-course{color:var(--muted);font-size:14px;margin-top:3px}
-.badge{font-size:11px;background:#e7eff8;color:var(--blue);padding:5px 9px;border-radius:99px;font-weight:800}
+.teacher-name{font-size:25px;font-weight:900}
+.teacher-course{color:var(--muted);font-size:14px;margin-top:3px}
+.teacher-label{
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:5px
+}
+.badge{font-size:11px;background:#e7eff8;color:var(--blue);padding:6px 10px;border-radius:99px;font-weight:800}
 .type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.type-card{border:1px solid var(--line);border-radius:12px;padding:13px;cursor:pointer;background:#fbfaf7}
-.type-card input{width:auto;margin-right:7px}.type-card:has(input:checked){border-color:var(--blue);background:#eef7fc}
-.period-options{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.period-option{border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center;background:#faf9f5;cursor:pointer}
-.period-option input{width:auto;margin-right:5px}.period-option:has(input:checked){border-color:var(--blue);background:#eef7fc}
+.type-card{
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:13px;
+  cursor:pointer;
+  background:#fbfaf7;
+  font-weight:700
+}
+.type-card input{width:auto;margin-right:7px}
+.type-card:has(input:checked){border-color:var(--blue);background:#eef7fc;box-shadow:0 0 0 2px rgba(30,120,180,.08)}
+.period-options{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.period-option{
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px;
+  text-align:center;
+  background:#faf9f5;
+  cursor:pointer;
+  font-weight:700
+}
+.period-option input{width:auto;margin-right:5px}
+.period-option:has(input:checked){border-color:var(--blue);background:#eef7fc}
 .period-card{border:1px solid var(--line);border-left:5px solid var(--blue);border-radius:12px;padding:15px;margin:12px 0;background:#fcfcfa}
 .period-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.hint{font-size:11px;color:var(--muted);line-height:1.45}.check{font-size:11px;margin-top:5px}
+.hint{font-size:11px;color:var(--muted);line-height:1.45}
+.check{font-size:11px;margin-top:5px;font-weight:700}
 .actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
-.btn{border:0;border-radius:10px;padding:12px 17px;font-weight:800;cursor:pointer}
-.btn-primary{background:var(--navy);color:#fff}.btn-secondary{background:#eef1f4;color:var(--navy)}
-.btn:disabled{opacity:.55}.status{display:none;margin-top:12px;padding:12px;border-radius:10px}
-.status.ok{display:block;background:#e3f0e6;color:#245d35}.status.err{display:block;background:#f9e4dd;color:#7a2c1b}
-.required{color:var(--red)}.autosave{font-size:11px;color:var(--muted);margin-top:8px}
-.success{display:none;text-align:center;padding:30px}.success h2{font-size:28px}.success .checkmark{font-size:48px}
+.btn{border:0;border-radius:10px;padding:12px 17px;font-weight:900;cursor:pointer;transition:.18s}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--navy);color:#fff}
+.btn-secondary{background:#eef1f4;color:var(--navy)}
+.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.status{display:none;margin-top:12px;padding:12px;border-radius:10px}
+.status.ok{display:block;background:#e3f0e6;color:#245d35}
+.status.err{display:block;background:#f9e4dd;color:#7a2c1b}
+.required{color:var(--red)}
+.autosave{font-size:11px;color:var(--muted);margin-top:8px}
+.success{display:none;text-align:center;padding:34px}
+.success h2{font-size:28px}
+.success .checkmark{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:76px;
+  height:76px;
+  border-radius:50%;
+  background:#e3f0e6;
+  color:var(--green);
+  font-size:48px
+}
+.site-footer{
+  margin-top:24px;
+  padding:18px 12px 0;
+  text-align:center;
+  color:var(--muted);
+  font-size:12px
+}
+.site-footer strong{color:var(--navy)}
+.site-footer .motto{color:#9a7614;font-weight:900;margin-top:4px}
 @media(max-width:780px){
-  .grid2,.grid5,.period-options,.type-grid{grid-template-columns:1fr}.teacher-box{display:block}.hero h1{font-size:25px}
+  .grid2,.grid5,.period-options,.type-grid{grid-template-columns:1fr}
+  .teacher-box{display:block}
+  .teacher-box .badge{display:inline-block;margin-top:12px}
+  .hero h1{font-size:26px}
+  .topbar{align-items:flex-start}
+  .brand-logo{width:44px;height:44px}
+  .version{display:none}
+}
+@media(max-width:520px){
+  .topbar{flex-direction:column}
+  .top-actions{width:100%;justify-content:space-between}
+  .home-link{width:100%;justify-content:center}
+  .hero{padding:22px}
 }
 </style>
 </head>
 <body>
 <div class="app">
 <div class="topbar">
-  <div class="brand">Instructional Leadership Platform</div>
-  <div class="version">Teacher Portal v3.1</div>
+  <div class="brand-wrap">
+    <img class="brand-logo" src="background-cover.png" alt="IDEA Spears College Prep">
+    <div class="brand">
+      STING<span class="em">'EM</span> Leadership Platform
+      <span class="brand-sub">IDEA Spears College Prep</span>
+    </div>
+  </div>
+  <div class="top-actions">
+    <a class="home-link" href="index.html" aria-label="Return to STING'EM Home">🏠 Home</a>
+    <div class="version">Teacher Portal v4.0</div>
+  </div>
 </div>
 
 <section class="hero">
+  <div class="portal-kicker">Teacher Portal</div>
   <h1>Instructional Data Submission</h1>
   <p>Submit Exit Ticket, assessment, or PLC data for selected instructional periods.</p>
   <div class="progress-wrap">
@@ -65,9 +263,10 @@ textarea{min-height:92px;resize:vertical}
   </div>
 </section>
 
-<section class="card" id="identityCard">
+<section class="card identity-card" id="identityCard">
   <div class="teacher-box">
     <div>
+      <div class="teacher-label">Teacher profile</div>
       <div class="teacher-name" id="teacherNameDisplay">Teacher link not recognized</div>
       <div class="teacher-course" id="teacherCourseDisplay">Use a valid personal teacher link.</div>
     </div>
@@ -129,6 +328,11 @@ textarea{min-height:92px;resize:vertical}
   <p id="confirmationText"></p>
   <button class="btn btn-primary" id="newSubmissionBtn">Start another submission</button>
 </section>
+<footer class="site-footer">
+  <strong>IDEA Spears College Prep</strong>
+  <div class="motto">Embrace the Sting</div>
+  <div>STING'EM Leadership Platform • Teacher Portal v4.0</div>
+</footer>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -145,16 +349,16 @@ const firebaseConfig={
 };
 
 const TEACHERS_BY_ID={
-  INT001:{legacyKey:"williams",name:"L. Williams",course:"Intervention",level:"special",maxPeriods:7},
   MTH601:{legacyKey:"chow",name:"T. Chow",course:"6th Math",level:"6-7",maxPeriods:6},
   MTH701:{legacyKey:"emenonyu",name:"A. Emenonyu",course:"7th Math",level:"6-7",maxPeriods:6},
   MTH801:{legacyKey:"raybon",name:"R. Raybon",course:"8th Math",level:"8",maxPeriods:7},
   GEO901:{legacyKey:"naves",name:"G. Naves",course:"Geometry",level:"9-12",maxPeriods:7},
-  ALG101:{legacyKey:"conkleton",name:"L. Conkleton",course:"Alg 1 - Pre Cal",level:"9-12",maxPeriods:7},
+  ALG101:{legacyKey:"conkleton",name:"L. Conkleton",course:"Algebra I & Algebra II",level:"9-12",maxPeriods:7},
+  PRECAL1:{legacyKey:"vargas",name:"Vargas",course:"Pre-Calculus",level:"9-12",maxPeriods:7},
   APSPAN1:{legacyKey:"mosqueda",name:"L. Mosqueda",course:"AP Spanish",level:"9-12",maxPeriods:7},
   PE001:{legacyKey:"quiroz",name:"R. Quiroz",course:"PE",level:"special",maxPeriods:7},
   PE002:{legacyKey:"waddell",name:"K. Waddell",course:"PE",level:"special",maxPeriods:7},
-  SPAN001:{legacyKey:"abdullah",name:"K. Abdullah",course:"Spanish",level:"9-12",maxPeriods:7}
+  SPAN001:{legacyKey:"abdullah",name:"K. Abdullah",course:"Spanish I & Spanish II",level:"9-12",maxPeriods:7}
 };
 
 const TEACHER_ID_BY_LEGACY_KEY=Object.fromEntries(
@@ -357,7 +561,7 @@ form.addEventListener("submit",async e=>{
     causes:document.getElementById("causes").value.trim(),
     solutions:document.getElementById("solutions").value.trim(),
     totals:{...totals,mastersMeetsApproachesPercent:totals.assessed?Math.round(((totals.mastered+totals.met+totals.approached)/totals.assessed)*100):0},
-    createdAt:serverTimestamp(),source:"personal-teacher-portal-v3.1"
+    createdAt:serverTimestamp(),source:"stingem-teacher-portal-v4.0"
   };
   submitBtn.disabled=true;submitBtn.textContent="Submitting…";
   try{
